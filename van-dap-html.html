@@ -1,0 +1,977 @@
+<title>Vấn Đáp HTML</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Bố cục: dải tiêu đề + 3 phần (câu hỏi có thanh bên, luyện vấn đáp, demo hai cột). Màu cam lấy từ biểu tượng HTML5, dùng cho khung thẻ ngữ nghĩa trên mọi bản demo. */
+:root{
+  --bg:#F4F5F9; --surface:#FFFFFF; --ink:#151A2E; --muted:#555C75;
+  --line:#DFE2EC; --line-strong:#C3C8D8;
+  --accent:#C73E1A; --accent-ink:#B23314; --accent-soft:#FCEBE5; --on-accent:#FFFFFF;
+  --code-bg:#EEF0F7; --k-tag:#B23314; --k-attr:#6A3FCB; --k-str:#0B7A47; --k-com:#6F7690;
+  --ok:#12794A; --ok-soft:#DDF3E7; --warn:#8F5A00; --warn-soft:#FFF0CF; --bad:#B42318; --bad-soft:#FDE7E4;
+  --gv:#E9ECF7; --sv:#FCEBE5;
+  --font:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1120; --surface:#161A2D; --ink:#E8EBF7; --muted:#9BA2BE;
+    --line:#272C46; --line-strong:#3A4163;
+    --accent:#FF7A4D; --accent-ink:#FF9A74; --accent-soft:#33201A; --on-accent:#1B0D07;
+    --code-bg:#0A0D1A; --k-tag:#FF9A74; --k-attr:#B9A0FF; --k-str:#6FDCA8; --k-com:#7C84A3;
+    --ok:#5FD9A0; --ok-soft:#12301F; --warn:#F2C25B; --warn-soft:#352B12; --bad:#FF8F85; --bad-soft:#3A1B1A;
+    --gv:#1F2440; --sv:#33201A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1120; --surface:#161A2D; --ink:#E8EBF7; --muted:#9BA2BE;
+  --line:#272C46; --line-strong:#3A4163;
+  --accent:#FF7A4D; --accent-ink:#FF9A74; --accent-soft:#33201A; --on-accent:#1B0D07;
+  --code-bg:#0A0D1A; --k-tag:#FF9A74; --k-attr:#B9A0FF; --k-str:#6FDCA8; --k-com:#7C84A3;
+  --ok:#5FD9A0; --ok-soft:#12301F; --warn:#F2C25B; --warn-soft:#352B12; --bad:#FF8F85; --bad-soft:#3A1B1A;
+  --gv:#1F2440; --sv:#33201A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.65 var(--font);-webkit-text-size-adjust:100%}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+a{color:var(--accent-ink)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+/* Dải tiêu đề */
+.top{background:var(--surface);border-bottom:1px solid var(--line)}
+.top .wrap{padding-block:28px 0}
+.kicker{margin:0 0 6px;font:500 12px/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.title{margin:0;font-weight:800;font-size:clamp(2rem,5vw,3.1rem);line-height:1.1;letter-spacing:-.02em;text-wrap:balance}
+.title .tag{display:inline-block;background:var(--accent);color:var(--on-accent);padding:0 .28em;border-radius:8px;margin-left:.1em}
+.lede{margin:14px 0 0;max-width:62ch;color:var(--muted)}
+.tabs{display:flex;gap:4px;margin-top:22px;overflow-x:auto}
+.tabs a{display:block;padding:12px 16px;white-space:nowrap;text-decoration:none;color:var(--muted);font-weight:600;border-bottom:3px solid transparent}
+.tabs a:hover{color:var(--ink)}
+.tabs a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+
+.main .wrap{padding-block:32px 56px}
+.foot{border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+.foot .wrap{padding-block:20px 32px}
+
+/* Phần câu hỏi */
+.qlayout{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+@media (min-width:960px){.qlayout{grid-template-columns:250px minmax(0,1fr);gap:44px}}
+.qnav{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+.qnav a{display:flex;align-items:baseline;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--ink);white-space:nowrap;border:1px solid var(--line);background:var(--surface);font-size:14px}
+.qnav a[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.qnav .qn{font:500 12px var(--mono);opacity:.7}
+@media (min-width:960px){
+  .qnav{flex-direction:column;overflow:visible;gap:2px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);align-self:start}
+  .qnav a{border:0;background:transparent;white-space:normal;padding:9px 12px}
+  .qnav a:hover{background:var(--line)}
+  .qnav a[aria-current="true"]{background:var(--ink);color:var(--bg)}
+}
+.qbody{display:flex;flex-direction:column;gap:40px;min-width:0}
+.qhead{display:flex;flex-direction:column;gap:10px}
+.eyebrow{margin:0;font:500 12px/1.4 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.lvl{padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);letter-spacing:0;text-transform:none;font-family:var(--font);font-weight:600}
+.qtitle{margin:0;font-size:clamp(1.35rem,3vw,1.9rem);line-height:1.3;font-weight:700;text-wrap:balance}
+.qhint{margin:0;color:var(--muted);font-size:14px}
+.sh{margin:0 0 12px;font-size:1.15rem;font-weight:700}
+.sec{min-width:0}
+.theory{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:10px;max-width:72ch}
+.theory code,.inl{font:500 .88em var(--mono);background:var(--code-bg);padding:1px 6px;border-radius:5px}
+.keys{margin:16px 0 0;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:10px;max-width:72ch}
+.keys h4{margin:0 0 8px;font-size:.95rem}
+.keys ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:15px}
+
+/* Trình soạn mã */
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.btn{font:600 14px var(--font);padding:8px 14px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn[disabled]{opacity:.45;cursor:default}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.switch{display:inline-flex;gap:8px;align-items:center;font-size:14px;color:var(--muted);cursor:pointer}
+.editor{position:relative;background:var(--code-bg);border:1px solid var(--line);border-radius:10px}
+.editor:focus-within{outline:2px solid var(--accent)}
+.ed-hl,.ed-ta{margin:0;border:0;padding:14px 16px 20px;font:400 13px/1.65 var(--mono);white-space:pre;tab-size:2;letter-spacing:0}
+.ed-hl{position:absolute;inset:0;overflow:hidden;pointer-events:none;color:var(--ink)}
+.ed-ta{position:relative;display:block;width:100%;min-height:120px;resize:none;overflow-x:auto;overflow-y:hidden;background:transparent;color:transparent;caret-color:var(--ink);outline:none;-webkit-text-fill-color:transparent}
+.k-t{color:var(--k-tag)}.k-a{color:var(--k-attr)}.k-s{color:var(--k-str)}.k-c{color:var(--k-com);font-style:italic}
+.pvwrap{margin-top:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.pvhead{padding:8px 14px;border-bottom:1px solid var(--line);font:500 12px var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.status{margin:0;padding:10px 14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);background:var(--bg);overflow-wrap:anywhere}
+.status.ok{color:var(--ok)}.status.warn{color:var(--warn)}.status.info{color:var(--ink)}
+.lint{margin-top:16px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.lint h4{margin:0 0 8px;font-size:.95rem;display:flex;gap:8px;align-items:center}
+.lint ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;font-size:14px}
+.lint li{padding:6px 10px;border-radius:6px}
+.lint li.w{background:var(--warn-soft);color:var(--ink)}
+.lint li.w::before{content:"Lỗi · ";font-weight:700;color:var(--warn)}
+.lint li.ok{background:var(--ok-soft);color:var(--ok);font-weight:600}
+.count{font:600 12px var(--mono);padding:1px 8px;border-radius:999px;background:var(--line)}
+.outline{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line-strong);font-size:14px}
+.outline b{display:block;margin-bottom:6px}
+.outline div{font-family:var(--mono);font-size:13px}
+.outline .skip{color:var(--bad)}
+
+/* Khung hiển thị: kiểu cho nội dung do người học viết */
+.pv{padding:24px 16px 16px;font-size:15px;line-height:1.55;color:var(--ink);overflow-x:auto}
+.pv-empty{margin:0;color:var(--bad);font-weight:600}
+.pv h1{font-size:1.6em;margin:.2em 0 .4em;line-height:1.2}
+.pv h2{font-size:1.3em;margin:.6em 0 .3em;line-height:1.25}
+.pv h3{font-size:1.12em;margin:.6em 0 .3em}
+.pv h4{font-size:1em;margin:.6em 0 .3em}
+.pv p{margin:.5em 0}
+.pv a{color:var(--accent-ink)}
+.pv input,.pv select,.pv textarea{font:inherit;padding:6px 8px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--ink);max-width:100%}
+.pv input[type=checkbox],.pv input[type=radio]{padding:0}
+.pv button{font:inherit;padding:6px 12px;border-radius:6px;border:1px solid var(--line-strong);background:var(--bg);color:var(--ink);cursor:pointer}
+.pv fieldset{border:1px solid var(--line-strong);border-radius:8px;margin:10px 0;padding:8px 12px}
+.pv label{margin-right:8px}
+.pv table{border-collapse:collapse;width:100%;margin:6px 0}
+.pv th,.pv td{border:1px solid var(--line-strong);padding:6px 10px;text-align:left}
+.pv th{background:var(--bg)}
+.pv caption{caption-side:top;text-align:left;font-weight:600;padding:4px 0}
+.pv nav ul{display:flex;gap:6px 18px;flex-wrap:wrap;list-style:none;padding:0;margin:0}
+.pv small{color:var(--muted)}
+.pv .note{padding:8px 12px;border-radius:6px;background:var(--bg);margin:6px 0}
+.pv .note.warn{background:var(--warn-soft)}
+.pv .badge{display:inline-block;padding:1px 10px;border-radius:999px;background:var(--line);font-size:.88em}
+.pv .badge.ok{background:var(--ok-soft);color:var(--ok)}
+.pv .badge.warn{background:var(--warn-soft);color:var(--warn)}
+.pv figure{margin:8px 0}
+.pv figcaption{font-size:.9em;color:var(--muted)}
+.pv :is(header,nav,main,footer,section,article,aside){margin-block:14px 8px}
+.flash{outline:3px solid var(--accent)!important;outline-offset:2px}
+/* khung thẻ ngữ nghĩa dùng chung cho khung hiển thị và trang demo */
+.tagview :is(header,nav,main,footer,section,article,aside){position:relative;outline:1px dashed var(--accent);outline-offset:3px}
+.tagview :is(header,nav,main,footer,section,article,aside)::before{position:absolute;top:-11px;left:8px;padding:0 6px;background:var(--surface);color:var(--accent-ink);font:500 11px/16px var(--mono);z-index:1;pointer-events:none}
+.tagview header::before{content:"<header>"}.tagview nav::before{content:"<nav>"}.tagview main::before{content:"<main>"}
+.tagview footer::before{content:"<footer>"}.tagview section::before{content:"<section>"}.tagview article::before{content:"<article>"}.tagview aside::before{content:"<aside>"}
+
+/* Lỗi thường gặp */
+.errs{display:flex;flex-direction:column;gap:28px;margin:0;padding:0;list-style:none}
+.err{display:flex;flex-direction:column;gap:10px;padding-top:20px;border-top:1px solid var(--line)}
+.err:first-child{border-top:0;padding-top:0}
+.err h4{margin:0;font-size:1.02rem}
+.err p{margin:0;color:var(--muted);max-width:72ch}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px}
+.cmp{margin:0;min-width:0}
+.cmp figcaption{font:600 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px}
+.cmp.bad figcaption{color:var(--bad)}.cmp.good figcaption{color:var(--ok)}
+.code{margin:0;padding:12px 14px;background:var(--code-bg);border-radius:8px;overflow-x:auto;font:400 13px/1.65 var(--mono);white-space:pre;tab-size:2}
+
+/* Hội thoại */
+.chat{display:flex;flex-direction:column;gap:12px}
+.msg{max-width:min(100%,640px);padding:10px 14px;border-radius:12px;font-size:15px}
+.msg b{display:block;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px;color:var(--muted)}
+.msg.gv{background:var(--gv);align-self:flex-start;border-top-left-radius:4px}
+.msg.sv{background:var(--sv);align-self:flex-end;border-top-right-radius:4px}
+.pager{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+/* Luyện vấn đáp */
+.plan{display:flex;flex-direction:column;gap:24px;max-width:820px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-width:44px;padding:8px 12px;border-radius:8px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);font:600 14px var(--font);cursor:pointer;position:relative}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip.done::after{content:"";position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.prog{font-size:14px;color:var(--muted)}
+.ask{padding:18px 20px;border-radius:12px;background:var(--gv)}
+.ask b{display:block;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.ask p{margin:0;font-size:1.15rem;font-weight:600;line-height:1.45}
+.ans{width:100%;min-height:130px;padding:12px 14px;font:400 15px/1.6 var(--font);border:1px solid var(--line-strong);border-radius:10px;background:var(--surface);color:var(--ink);resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.res{display:flex;flex-direction:column;gap:6px;margin:0;padding:0;list-style:none}
+.res li{padding:8px 12px;border-radius:8px;font-size:15px;display:flex;gap:10px}
+.res li.hit{background:var(--ok-soft)}.res li.miss{background:var(--bad-soft)}
+.res li span:first-child{font-weight:700;flex:none}
+.res li.hit span:first-child{color:var(--ok)}.res li.miss span:first-child{color:var(--bad)}
+.model{padding:14px 18px;border:1px solid var(--line);border-radius:10px;background:var(--surface);max-width:72ch}
+.model b{display:block;margin-bottom:4px}
+
+/* Demo buổi giảng */
+.dlayout{display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
+@media (min-width:1020px){.dlayout{grid-template-columns:380px minmax(0,1fr);gap:32px;align-items:start}.lect{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}}
+.lect{display:flex;flex-direction:column;gap:14px;padding:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;min-width:0}
+.lect h3{margin:0;font-size:1.15rem}
+.say{margin:0;font-size:15px}
+.lect .code{font-size:12px}
+.sw{display:flex;flex-direction:column;gap:6px}
+.insp{padding:12px 14px;border-radius:8px;background:var(--bg);font-size:14px;overflow-wrap:anywhere}
+.insp code{font:500 12px var(--mono);color:var(--accent-ink)}
+.sitebox{min-width:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.sitebar{display:flex;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--bg);font:500 12px var(--mono);color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line-strong)}
+.site{padding:28px 20px 20px;display:flex;flex-direction:column;gap:26px;font-size:15px;line-height:1.55}
+.site h1{margin:0;font-size:1.5rem;line-height:1.2}
+.site h2{margin:0 0 10px;font-size:1.15rem}
+.site header{display:flex;align-items:center;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.site header img{border-radius:8px}
+.site nav ul{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+.site nav a{display:block;padding:6px 12px;border-radius:6px;text-decoration:none;color:var(--ink);background:var(--bg)}
+.site nav a[aria-current="page"]{background:var(--ink);color:var(--bg)}
+.site main{display:flex;flex-direction:column;gap:30px}
+.tscroll{overflow-x:auto}
+.site table{border-collapse:collapse;width:100%;min-width:480px}
+.site th,.site td{border-bottom:1px solid var(--line);padding:8px 10px;text-align:left}
+.site thead th{background:var(--bg);font-size:13px}
+.site caption{text-align:left;font-weight:600;padding-bottom:6px}
+.site tfoot th,.site tfoot td{font-weight:600}
+.site fieldset{border:1px solid var(--line-strong);border-radius:8px;padding:10px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px 14px;margin:0 0 12px}
+.site legend{font-weight:600;padding:0 6px}
+.site .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.site .f label{font-size:13px;font-weight:600}
+.site input:not([type=hidden]),.site select{font:inherit;padding:7px 9px;border:1px solid var(--line-strong);border-radius:6px;background:var(--surface);color:var(--ink);min-width:0;width:100%}
+.site button{font:600 13px var(--font);padding:6px 12px;border-radius:6px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer}
+.site button[type=submit]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.site button.danger{color:var(--bad);border-color:var(--bad)}
+.site button.danger.arm{background:var(--bad);color:var(--surface)}
+.site .msg2{margin:8px 0 0;font-size:14px;min-height:1.5em}
+.site footer{padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:14px}
+.site footer p{margin:0}
+.hl-on{outline:3px solid var(--accent)!important;outline-offset:3px;background-color:var(--accent-soft)}
+.sel{outline:2px solid var(--ink)!important;outline-offset:2px}
+.finale{display:flex;flex-direction:column;gap:6px;margin:0;padding-left:1.2em;font-size:14px}
+@media (prefers-reduced-motion:no-preference){.hl-on,.flash{transition:outline-color .2s}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <p class="kicker">INS2053 · Web Authoring and Web Management</p>
+    <h1 class="title">Vấn Đáp <span class="tag">HTML</span></h1>
+    <p class="lede">10 câu hỏi giảng viên có thể đặt cho một website có Header, Footer, Navigation, Form và bảng CRUD. Đọc lý thuyết, sửa mã ngay trên trang, rồi tập trả lời như trong buổi vấn đáp.</p>
+    <nav class="tabs" aria-label="Các phần của bài">
+      <a href="#cau-1" id="tab-cau-hoi">Bộ 10 câu hỏi</a>
+      <a href="#luyen-van-dap" id="tab-luyen">Luyện vấn đáp</a>
+      <a href="#demo" id="tab-demo">Demo buổi giảng</a>
+    </nav>
+  </div>
+</header>
+
+<div class="main">
+  <div class="wrap">
+    <section id="view-cau-hoi" aria-label="Bộ 10 câu hỏi"></section>
+    <section id="view-luyen" aria-label="Luyện vấn đáp" hidden></section>
+    <section id="view-demo" aria-label="Demo buổi giảng" hidden></section>
+  </div>
+</div>
+
+<footer class="foot">
+  <div class="wrap">Mã HTML trong trang chạy trực tiếp để quan sát kết quả. Các form chỉ hiển thị dữ liệu sẽ gửi chứ không gửi đi đâu.</div>
+</footer>
+
+<script>
+(function(){
+"use strict";
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')};
+var store={get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+var SVG="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='90'%3E%3Crect width='160' height='90' fill='%23e34f26'/%3E%3C/svg%3E";
+
+/* ===== Tô màu mã HTML ===== */
+function hl(src){
+  var re=/(<!--[\s\S]*?-->)|(<!DOCTYPE[^>]*>)|(<\/?[A-Za-z][\w:-]*)|(\/?>)|([A-Za-z_:][\w:.-]*)(?==)|=(\s*)("[^"]*"|'[^']*')/gi;
+  var out='',last=0,m;
+  while((m=re.exec(src))){
+    out+=esc(src.slice(last,m.index)); last=re.lastIndex;
+    if(m[1]) out+='<span class="k-c">'+esc(m[1])+'</span>';
+    else if(m[2]||m[3]||m[4]) out+='<span class="k-t">'+esc(m[2]||m[3]||m[4])+'</span>';
+    else if(m[5]) out+='<span class="k-a">'+esc(m[5])+'</span>';
+    else out+='='+esc(m[6])+'<span class="k-s">'+esc(m[7])+'</span>';
+  }
+  return out+esc(src.slice(last));
+}
+
+/* ===== Nội dung 10 câu hỏi ===== */
+var Q=[
+{id:1,title:"Cấu trúc HTML5",level:"Cơ bản",
+ q:"Em hãy cho biết cấu trúc tối thiểu của một trang HTML5. Vì sao phải có <!DOCTYPE html> và <meta charset=\"UTF-8\">?",
+ theory:[
+  "<code>&lt;!DOCTYPE html&gt;</code> không phải thẻ HTML mà là khai báo kiểu tài liệu. Nó bắt trình duyệt dùng <em>standards mode</em>. Thiếu dòng này, trình duyệt rơi vào <em>quirks mode</em>, hiển thị theo quy tắc cũ nên giao diện dễ bị lệch.",
+  "<code>&lt;html lang=\"vi\"&gt;</code> là phần tử gốc. Thuộc tính <code>lang</code> giúp trình đọc màn hình phát âm đúng, công cụ dịch và công cụ tìm kiếm hiểu ngôn ngữ của trang.",
+  "<code>&lt;head&gt;</code> chứa siêu dữ liệu không hiển thị: <code>meta charset</code>, <code>meta viewport</code>, <code>title</code>, liên kết tới CSS. <code>&lt;body&gt;</code> chứa mọi nội dung người dùng nhìn thấy.",
+  "<code>charset=\"UTF-8\"</code> nên đặt ngay đầu head (trong 1024 byte đầu của file) để chữ tiếng Việt có dấu hiển thị đúng. File cũng phải được lưu ở dạng UTF-8.",
+  "<code>meta viewport</code> cho phép trang co giãn đúng kích thước trên điện thoại."],
+ keys:[
+  {t:"DOCTYPE bật standards mode, tránh quirks mode",kw:["doctype","standards","quirks"]},
+  {t:"Phần tử gốc html và thuộc tính lang",kw:["lang","html"]},
+  {t:"head chứa siêu dữ liệu, body chứa nội dung hiển thị",kw:["head","metadata","sieu du lieu","body"]},
+  {t:"meta charset UTF-8 để chữ tiếng Việt không lỗi",kw:["charset","utf"]},
+  {t:"meta viewport cho giao diện trên điện thoại",kw:["viewport","responsive","dien thoai","mobile"]}],
+ answer:"Một trang HTML5 tối thiểu gồm khai báo <!DOCTYPE html>, phần tử gốc <html lang=\"vi\"> và hai phần con là head và body. Head chứa meta charset UTF-8, meta viewport và title. Body chứa nội dung hiển thị. DOCTYPE giúp trình duyệt dùng standards mode thay vì quirks mode, còn charset UTF-8 giúp chữ tiếng Việt có dấu không bị lỗi.",
+ code:"<!DOCTYPE html>\n<html lang=\"vi\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Quản lý sinh viên</title>\n</head>\n<body>\n  <h1>Quản lý sinh viên</h1>\n  <p>Trang đầu tiên của tôi.</p>\n</body>\n</html>",
+ bad:"<html>\n<head>\n  <title>Quản lý sinh viên\n</head>\n<body>\n  <h1>Quản lý sinh viên</h1>\n  <p>Trang đầu tiên của tôi.</p>\n</body>\n</html>",
+ errors:[
+  {t:"Thiếu DOCTYPE",why:"Trình duyệt chuyển sang quirks mode. Mô hình hộp và một số quy tắc CSS chạy theo kiểu cũ nên cùng một đoạn CSS cho kết quả khác.",bad:"<html>\n<head>…</head>",fix:"<!DOCTYPE html>\n<html lang=\"vi\">\n<head>…</head>"},
+  {t:"Thiếu meta charset",why:"Trình duyệt phải đoán bảng mã, chữ có dấu có thể thành ký tự lạ (dấu hỏi, ô vuông).",bad:"<head>\n  <title>Trang</title>\n</head>",fix:"<head>\n  <meta charset=\"UTF-8\">\n  <title>Trang</title>\n</head>"},
+  {t:"Thiếu meta viewport",why:"Điện thoại hiển thị trang như màn hình máy tính rồi thu nhỏ lại, chữ rất bé.",bad:"<head>\n  <meta charset=\"UTF-8\">\n</head>",fix:"<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n</head>"},
+  {t:"Quên đóng thẻ title",why:"Mọi thứ phía sau bị coi là chữ của tiêu đề nên cả trang trống. Hãy bấm \"Nạp bản có lỗi\" ở trên để thấy.",bad:"<title>Quản lý sinh viên\n</head>",fix:"<title>Quản lý sinh viên</title>\n</head>"}],
+ dialog:[
+  ["gv","Em cho thầy biết cấu trúc tối thiểu của một trang HTML5?"],
+  ["sv","Gồm DOCTYPE, thẻ html có lang, rồi head và body. Head chứa charset, viewport, title. Body chứa nội dung hiển thị."],
+  ["gv","Nếu em bỏ dòng DOCTYPE thì chuyện gì xảy ra?"],
+  ["sv","Trình duyệt chuyển sang quirks mode, một số quy tắc CSS chạy theo kiểu cũ nên giao diện có thể lệch. Trang vẫn hiển thị nhưng không đáng tin cậy."],
+  ["gv","Vì sao chữ tiếng Việt của em hiển thị thành dấu hỏi?"],
+  ["sv","Vì trình duyệt đọc file bằng bảng mã khác với lúc lưu. Em khai báo meta charset UTF-8 trong head và lưu file ở dạng UTF-8."],
+  ["gv","Thẻ title khác thẻ h1 ở điểm nào?"],
+  ["sv","title nằm trong head, hiện trên tab trình duyệt và kết quả tìm kiếm. h1 nằm trong body, là tiêu đề chính hiển thị trong trang."]]},
+
+{id:2,title:"Thẻ ngữ nghĩa",level:"Cơ bản",
+ q:"Header, nav, main, footer khác gì thẻ <div>? Vì sao nên dùng thẻ ngữ nghĩa trong website của em?",
+ theory:[
+  "Thẻ ngữ nghĩa (semantic) cho biết <em>vai trò</em> của nội dung. <code>div</code> và <code>span</code> không mang ý nghĩa gì.",
+  "Trình đọc màn hình dùng chúng làm mốc (landmark): người dùng nhảy thẳng tới <code>nav</code> hoặc <code>main</code>. Công cụ tìm kiếm cũng hiểu cấu trúc trang tốt hơn, và người viết mã đọc dễ hơn một rừng div.",
+  "<code>header</code>: phần đầu trang hoặc đầu một khối (logo, tiêu đề). <code>nav</code>: nhóm liên kết điều hướng chính. <code>main</code>: nội dung chính, chỉ có một <code>main</code> hiển thị trong trang. <code>section</code>: nhóm nội dung cùng chủ đề, thường có tiêu đề. <code>article</code>: nội dung tự đứng độc lập. <code>aside</code>: nội dung phụ. <code>footer</code>: phần cuối (bản quyền, liên hệ).",
+  "Về hiển thị, các thẻ này mặc định giống <code>div</code> (khối). Giao diện do CSS quyết định, thẻ ngữ nghĩa chỉ thêm ý nghĩa."],
+ keys:[
+  {t:"Thẻ ngữ nghĩa cho biết vai trò, div không mang ý nghĩa",kw:["ngu nghia","semantic","khong mang","khong y nghia"]},
+  {t:"Trình đọc màn hình dùng làm mốc (accessibility)",kw:["landmark","man hinh","accessib","truy cap"]},
+  {t:"Lợi ích với SEO và dễ bảo trì",kw:["seo","tim kiem","bao tri","de doc"]},
+  {t:"Chỉ có một thẻ main trong trang",kw:["main"]},
+  {t:"Vai trò của header, nav, section, footer",kw:["header","footer","section","nav"]}],
+ answer:"Về hiển thị, thẻ ngữ nghĩa và div giống nhau vì đều là phần tử khối. Khác ở ý nghĩa: header, nav, main, footer cho trình duyệt, trình đọc màn hình và công cụ tìm kiếm biết vai trò của từng khối, giúp truy cập tốt hơn, SEO tốt hơn và mã dễ đọc hơn. Một trang chỉ có một main, bên trong chứa nhiều section có tiêu đề.",
+ code:"<header>\n  <h1>Quản lý sinh viên</h1>\n</header>\n<nav aria-label=\"Điều hướng chính\">\n  <ul>\n    <li><a href=\"#danh-sach\">Danh sách</a></li>\n    <li><a href=\"#them-moi\">Thêm mới</a></li>\n  </ul>\n</nav>\n<main>\n  <section id=\"danh-sach\">\n    <h2>Danh sách sinh viên</h2>\n    <p>Bảng dữ liệu nằm ở đây.</p>\n  </section>\n  <section id=\"them-moi\">\n    <h2>Thêm sinh viên</h2>\n    <p>Biểu mẫu nằm ở đây.</p>\n  </section>\n  <aside>\n    <p>Mẹo: nhấn F12 để xem cấu trúc trang.</p>\n  </aside>\n</main>\n<footer>\n  <p>© 2026 Lớp INS2053</p>\n</footer>",
+ bad:"<div class=\"header\">\n  <div class=\"title\">Quản lý sinh viên</div>\n</div>\n<div class=\"nav\">\n  <a href=\"#a\">Danh sách</a>\n  <a href=\"#b\">Thêm mới</a>\n</div>\n<div class=\"main\">\n  <div>Nội dung chính</div>\n</div>\n<div class=\"footer\">© 2026 Lớp INS2053</div>",
+ errors:[
+  {t:"Dùng div cho mọi khối",why:"Trang trông giống nhau nhưng trình đọc màn hình và công cụ tìm kiếm không biết đâu là menu, đâu là nội dung chính.",bad:"<div class=\"header\">…</div>\n<div class=\"nav\">…</div>\n<div class=\"footer\">…</div>",fix:"<header>…</header>\n<nav>…</nav>\n<footer>…</footer>"},
+  {t:"Hai thẻ main trong một trang",why:"Mỗi trang chỉ có một nội dung chính. Nếu có nhiều phần, hãy dùng nhiều section bên trong một main.",bad:"<main>Danh sách</main>\n<main>Thêm mới</main>",fix:"<main>\n  <section>Danh sách</section>\n  <section>Thêm mới</section>\n</main>"},
+  {t:"Dùng section chỉ để tạo khung CSS",why:"section biểu thị một nhóm nội dung có chủ đề và thường có tiêu đề. Nếu chỉ cần khung bọc để tạo kiểu thì dùng div.",bad:"<section class=\"khung\">\n  <p>Một đoạn chữ</p>\n</section>",fix:"<div class=\"khung\">\n  <p>Một đoạn chữ</p>\n</div>"}],
+ dialog:[
+  ["gv","Thầy thấy em dùng header, nav, main, footer. Khác gì viết div class=\"header\"?"],
+  ["sv","Về hiển thị thì giống nhau vì đều là phần tử khối. Khác ở ý nghĩa: thẻ ngữ nghĩa cho trình duyệt, trình đọc màn hình và công cụ tìm kiếm biết vai trò của khối. Người dùng trình đọc màn hình có thể nhảy thẳng tới nav hoặc main."],
+  ["gv","Một trang được có mấy thẻ main?"],
+  ["sv","Chỉ một thẻ main hiển thị, vì nó là nội dung chính duy nhất của trang. Bên trong có thể có nhiều section."],
+  ["gv","Khi nào em dùng section, khi nào dùng div?"],
+  ["sv","Em dùng section khi nhóm nội dung có chủ đề riêng và có tiêu đề, ví dụ phần Danh sách sinh viên. Nếu chỉ cần một khung để tạo kiểu CSS thì em dùng div."]]},
+
+{id:3,title:"Điều hướng và liên kết",level:"Cơ bản",
+ q:"Em xây dựng thanh điều hướng như thế nào? Phân biệt đường dẫn tuyệt đối, tương đối, liên kết neo (#) và target=\"_blank\".",
+ theory:[
+  "Cấu trúc chuẩn là <code>nav &gt; ul &gt; li &gt; a</code>. Dùng danh sách để trình đọc màn hình báo \"danh sách 4 mục\" và để dễ xếp menu ngang bằng CSS.",
+  "<code>href</code> <em>tuyệt đối</em> có đủ giao thức và tên miền (<code>https://vnu.edu.vn/</code>). <em>Tương đối</em> tính từ vị trí file hiện tại (<code>pages/lien-he.html</code>, <code>../index.html</code>). <em>Liên kết neo</em> <code>#lien-he</code> nhảy tới phần tử có <code>id=\"lien-he\"</code>.",
+  "<code>target=\"_blank\"</code> mở tab mới. Nên kèm <code>rel=\"noopener noreferrer\"</code> để trang mới không điều khiển được trang cũ.",
+  "Đánh dấu mục đang xem bằng <code>aria-current=\"page\"</code>. Chữ của liên kết phải có nghĩa (\"Danh sách sinh viên\"), tránh \"bấm vào đây\".",
+  "Trên máy chủ Linux, tên file phân biệt hoa thường: <code>Lien-He.html</code> khác <code>lien-he.html</code>."],
+ keys:[
+  {t:"Dùng nav chứa danh sách ul và li",kw:["nav","ul","li","danh sach"]},
+  {t:"Đường dẫn tuyệt đối và tương đối",kw:["tuyet doi","tuong doi","absolute","relative"]},
+  {t:"Liên kết neo # trỏ tới id",kw:["neo","anchor","#","id"]},
+  {t:"target=_blank kèm rel noopener",kw:["_blank","noopener","tab moi"]},
+  {t:"Chữ liên kết có nghĩa, aria-current",kw:["aria-current","y nghia","trang hien tai"]}],
+ answer:"Em dùng thẻ nav chứa danh sách ul, mỗi mục là li chứa một thẻ a. Đường dẫn tuyệt đối có đầy đủ giao thức và tên miền, đường dẫn tương đối tính từ vị trí file hiện tại, liên kết neo bắt đầu bằng # và trỏ tới id của một phần tử. Khi mở tab mới bằng target=\"_blank\", em thêm rel=\"noopener noreferrer\" để an toàn.",
+ code:"<nav aria-label=\"Điều hướng chính\">\n  <ul>\n    <li><a href=\"#trang-chu\" aria-current=\"page\">Trang chủ</a></li>\n    <li><a href=\"#danh-sach\">Danh sách</a></li>\n    <li><a href=\"#lien-he\">Liên hệ</a></li>\n    <li><a href=\"https://www.w3.org/\" target=\"_blank\" rel=\"noopener noreferrer\">W3C</a></li>\n  </ul>\n</nav>\n<h2 id=\"trang-chu\">Trang chủ</h2>\n<p>Chào mừng bạn đến với hệ thống.</p>\n<h2 id=\"danh-sach\">Danh sách</h2>\n<p>Bảng sinh viên.</p>\n<h2 id=\"lien-he\">Liên hệ</h2>\n<p>Email: lop@example.edu.vn</p>",
+ bad:"<nav>\n  <a href=\"#trang-chu\">Trang chủ</a> |\n  <a href=\"#ds\">Bấm vào đây</a> |\n  <a href=\"https://www.w3.org/\" target=\"_blank\">W3C</a>\n</nav>\n<h2 id=\"trang-chu\">Trang chủ</h2>\n<p>Chào mừng bạn đến với hệ thống.</p>\n<h2 id=\"danh-sach\">Danh sách</h2>\n<p>Bảng sinh viên.</p>",
+ errors:[
+  {t:"Liên kết neo trỏ sai id",why:"Bấm vào không có gì xảy ra vì không có phần tử nào mang id đó. Hãy thử bấm liên kết trong bản lỗi.",bad:"<a href=\"#ds\">Danh sách</a>\n<h2 id=\"danh-sach\">…</h2>",fix:"<a href=\"#danh-sach\">Danh sách</a>\n<h2 id=\"danh-sach\">…</h2>"},
+  {t:"target=\"_blank\" thiếu rel",why:"Trang mở ra có thể dùng window.opener để điều khiển trang cũ. Trình duyệt mới đã giảm rủi ro này nhưng khai báo rel vẫn là thói quen đúng.",bad:"<a href=\"https://w3.org/\" target=\"_blank\">W3C</a>",fix:"<a href=\"https://w3.org/\" target=\"_blank\" rel=\"noopener noreferrer\">W3C</a>"},
+  {t:"Chữ liên kết mơ hồ",why:"Người dùng trình đọc màn hình thường nghe danh sách liên kết, nên \"bấm vào đây\" lặp lại nhiều lần không cho biết gì.",bad:"<a href=\"ds.html\">Bấm vào đây</a>",fix:"<a href=\"ds.html\">Danh sách sinh viên</a>"},
+  {t:"Dùng dấu | hoặc br thay cho danh sách",why:"Menu là danh sách các mục. Dùng ul và li thì mới có ngữ nghĩa danh sách và dễ định dạng.",bad:"<nav>\n  <a href=\"a.html\">A</a> | <a href=\"b.html\">B</a>\n</nav>",fix:"<nav>\n  <ul>\n    <li><a href=\"a.html\">A</a></li>\n    <li><a href=\"b.html\">B</a></li>\n  </ul>\n</nav>"}],
+ dialog:[
+  ["gv","Vì sao em bọc các liên kết trong ul và li?"],
+  ["sv","Menu là một danh sách các mục. Trình đọc màn hình sẽ báo \"danh sách 4 mục\", và em dễ dùng CSS để xếp ngang."],
+  ["gv","Phân biệt href=\"pages/lien-he.html\" và href=\"https://vnu.edu.vn/lien-he.html\"?"],
+  ["sv","Cái đầu là đường dẫn tương đối, tính từ vị trí file hiện tại. Cái sau là tuyệt đối, có đủ giao thức và tên miền. Em dùng tương đối cho các trang cùng website, tuyệt đối cho website khác."],
+  ["gv","Em mở liên kết ra tab mới như thế nào cho an toàn?"],
+  ["sv","Em dùng target=\"_blank\" kèm rel=\"noopener noreferrer\" để trang mở ra không điều khiển được trang cũ."]]},
+
+{id:4,title:"Form, GET/POST, name",level:"Trung bình",
+ q:"Thẻ <form> hoạt động ra sao? Phân biệt method GET và POST, và vai trò của thuộc tính name so với id.",
+ theory:[
+  "<code>form</code> gom các điều khiển (<code>input</code>, <code>select</code>, <code>textarea</code>, <code>button</code>) và gửi dữ liệu tới địa chỉ trong <code>action</code> khi bấm nút gửi.",
+  "<strong>GET</strong>: dữ liệu nằm trên URL (<code>?q=an</code>), có thể bookmark, giới hạn độ dài, không dùng cho dữ liệu nhạy cảm. Hợp với tìm kiếm, lọc. <strong>POST</strong>: dữ liệu nằm trong thân yêu cầu, dùng để tạo, sửa dữ liệu, đăng nhập. Nếu không khai báo <code>method</code>, mặc định là GET.",
+  "<code>name</code> là khóa gửi lên máy chủ. Điều khiển không có <code>name</code> sẽ <em>không</em> được gửi. <code>id</code> là định danh duy nhất trong trang, dùng cho label, CSS, JavaScript, liên kết neo.",
+  "Nhóm radio phải cùng <code>name</code> thì mới chỉ chọn được một, mỗi radio có <code>value</code> riêng. Các <code>type</code> hay dùng: text, email, password, number, date, tel, checkbox, radio, hidden.",
+  "Nút trong form: <code>type=\"submit\"</code> (mặc định), <code>type=\"button\"</code> (không gửi), <code>type=\"reset\"</code>."],
+ keys:[
+  {t:"form gửi dữ liệu tới action",kw:["action","gui du lieu"]},
+  {t:"GET đặt dữ liệu trên URL, POST trong thân yêu cầu",kw:["get","post"]},
+  {t:"name là khóa gửi lên máy chủ, thiếu name thì không gửi",kw:["name"]},
+  {t:"id dùng định danh cho label, CSS, JavaScript",kw:["id","dinh danh","duy nhat"]},
+  {t:"Radio cùng name để chỉ chọn một",kw:["radio","cung name"]}],
+ answer:"Form gom các ô nhập và gửi dữ liệu tới địa chỉ trong action. GET đặt dữ liệu trên URL nên hợp với tìm kiếm, POST đặt dữ liệu trong thân yêu cầu nên hợp với thêm hoặc sửa dữ liệu. Thuộc tính name là khóa gửi lên máy chủ, ô nào thiếu name thì không được gửi, còn id chỉ để định danh trong trang, dùng cho label, CSS và JavaScript. Các radio cùng một nhóm phải cùng name.",
+ code:"<form action=\"/sinh-vien/them\" method=\"post\">\n  <p>\n    <label for=\"ho-ten\">Họ và tên</label>\n    <input id=\"ho-ten\" name=\"ho_ten\" type=\"text\" required>\n  </p>\n  <p>\n    <label for=\"email\">Email</label>\n    <input id=\"email\" name=\"email\" type=\"email\" required>\n  </p>\n  <p>\n    <label for=\"lop\">Lớp</label>\n    <select id=\"lop\" name=\"lop\">\n      <option value=\"K68-IS\">K68-IS</option>\n      <option value=\"K68-CS\">K68-CS</option>\n    </select>\n  </p>\n  <p>\n    <input type=\"radio\" id=\"gt-nam\" name=\"gioi_tinh\" value=\"nam\" checked>\n    <label for=\"gt-nam\">Nam</label>\n    <input type=\"radio\" id=\"gt-nu\" name=\"gioi_tinh\" value=\"nu\">\n    <label for=\"gt-nu\">Nữ</label>\n  </p>\n  <button type=\"submit\">Lưu</button>\n  <button type=\"reset\">Nhập lại</button>\n</form>",
+ bad:"<form action=\"/sinh-vien/them\">\n  <p>\n    <label>Họ và tên</label>\n    <input id=\"ho-ten\" type=\"text\">\n  </p>\n  <p>\n    <input type=\"radio\" id=\"gt-nam\" name=\"nam\" checked> Nam\n    <input type=\"radio\" id=\"gt-nu\" name=\"nu\"> Nữ\n  </p>\n  <button>Hủy</button>\n  <button type=\"submit\">Lưu</button>\n</form>",
+ errors:[
+  {t:"Ô nhập thiếu name",why:"Dữ liệu của ô đó không được gửi lên máy chủ. Hãy bấm Lưu ở bản lỗi, khung kết quả sẽ cho thấy form gửi đi gì.",bad:"<input id=\"ho-ten\" type=\"text\">",fix:"<input id=\"ho-ten\" name=\"ho_ten\" type=\"text\">"},
+  {t:"Radio cùng nhóm nhưng khác name",why:"Trình duyệt coi mỗi radio là một nhóm riêng, nên chọn được cả hai. Cùng nhóm thì phải cùng name.",bad:"<input type=\"radio\" name=\"nam\">\n<input type=\"radio\" name=\"nu\">",fix:"<input type=\"radio\" name=\"gioi_tinh\" value=\"nam\">\n<input type=\"radio\" name=\"gioi_tinh\" value=\"nu\">"},
+  {t:"Quên method, mặc định là GET",why:"Mật khẩu hay dữ liệu cá nhân hiện luôn trên thanh địa chỉ và trong lịch sử trình duyệt.",bad:"<form action=\"/dang-nhap\">\n  <input type=\"password\" name=\"mk\">\n</form>",fix:"<form action=\"/dang-nhap\" method=\"post\">\n  <input type=\"password\" name=\"mk\">\n</form>"},
+  {t:"Nút Hủy trong form không có type",why:"button trong form mặc định là submit, nên bấm Hủy vẫn gửi form đi.",bad:"<button>Hủy</button>",fix:"<button type=\"button\">Hủy</button>"}],
+ dialog:[
+  ["gv","Em chọn GET hay POST cho form thêm sinh viên? Vì sao?"],
+  ["sv","POST, vì thao tác tạo dữ liệu và dữ liệu nằm trong thân yêu cầu. GET em dùng cho form tìm kiếm vì URL có thể chia sẻ và bookmark."],
+  ["gv","Một ô input không có name thì sao?"],
+  ["sv","Dữ liệu của ô đó không được gửi lên máy chủ. name là khóa, còn id chỉ để định danh trong trang, dùng cho label, CSS và JavaScript."],
+  ["gv","Làm sao để ba nút Giới tính chỉ chọn được một?"],
+  ["sv","Cho các radio cùng một name, mỗi radio có value riêng."]]},
+
+{id:5,title:"Label và nhóm ô nhập",level:"Trung bình",
+ q:"Vì sao phải dùng <label> cho ô nhập liệu? Placeholder có thay thế được label không? fieldset và legend dùng khi nào?",
+ theory:[
+  "<code>label for=\"x\"</code> liên kết với điều khiển có <code>id=\"x\"</code>. Bấm vào label thì ô nhập được focus (checkbox, radio thì được chọn), vùng bấm lớn hơn, và trình đọc màn hình đọc nhãn khi người dùng đứng ở ô đó. Cũng có thể bọc điều khiển trong label mà không cần <code>for</code>.",
+  "Placeholder chỉ là gợi ý ví dụ: biến mất khi gõ, thường nhạt khó đọc, không đáng tin để làm nhãn.",
+  "<code>fieldset</code> nhóm các điều khiển liên quan, <code>legend</code> là tiêu đề của nhóm. Dùng cho nhóm radio hoặc checkbox cùng trả lời một câu hỏi (ví dụ \"Giới tính\").",
+  "Có thể bổ sung gợi ý bằng <code>aria-describedby</code> nối tới đoạn mô tả. <code>autocomplete</code> giúp trình duyệt điền tự động."],
+ keys:[
+  {t:"label for khớp id của ô nhập",kw:["for","id"]},
+  {t:"Bấm label thì focus ô nhập, hỗ trợ trình đọc màn hình",kw:["focus","man hinh","truy cap","accessib"]},
+  {t:"Placeholder không thay thế label",kw:["placeholder"]},
+  {t:"fieldset và legend nhóm radio hoặc checkbox",kw:["fieldset","legend"]},
+  {t:"Có thể bọc ô nhập trong label",kw:["boc","trong label"]}],
+ answer:"Label liên kết với ô nhập qua thuộc tính for trùng với id của ô, hoặc bọc ô nhập bên trong label. Nhờ đó bấm vào nhãn sẽ focus vào ô và trình đọc màn hình đọc đúng nhãn. Placeholder không thay được label vì biến mất khi gõ và thường khó đọc. Fieldset và legend dùng để nhóm các radio hoặc checkbox cùng trả lời một câu hỏi.",
+ code:"<form>\n  <p>\n    <label for=\"mssv\">Mã sinh viên</label>\n    <input id=\"mssv\" name=\"mssv\" type=\"text\" placeholder=\"VD: 23020001\" aria-describedby=\"mssv-help\">\n    <small id=\"mssv-help\">Gồm 8 chữ số.</small>\n  </p>\n  <fieldset>\n    <legend>Học phần đã đăng ký</legend>\n    <label><input type=\"checkbox\" name=\"hp\" value=\"ins2053\" checked> INS2053</label>\n    <label><input type=\"checkbox\" name=\"hp\" value=\"int2204\"> INT2204</label>\n  </fieldset>\n  <p>\n    <label for=\"ghi-chu\">Ghi chú</label><br>\n    <textarea id=\"ghi-chu\" name=\"ghi_chu\" rows=\"3\"></textarea>\n  </p>\n</form>",
+ bad:"<form>\n  <p>\n    <label for=\"ma-sv\">Mã sinh viên</label>\n    <input id=\"mssv\" name=\"mssv\" type=\"text\">\n  </p>\n  <p>\n    <input name=\"ho_ten\" type=\"text\" placeholder=\"Họ và tên\">\n  </p>\n  <p>\n    <input type=\"checkbox\" name=\"hp\" value=\"ins2053\"> INS2053\n  </p>\n</form>",
+ errors:[
+  {t:"label for không khớp id",why:"Label không gắn với ô nào, bấm vào nhãn không focus ô nhập và trình đọc màn hình không đọc nhãn.",bad:"<label for=\"ma-sv\">Mã sinh viên</label>\n<input id=\"mssv\" name=\"mssv\">",fix:"<label for=\"mssv\">Mã sinh viên</label>\n<input id=\"mssv\" name=\"mssv\">"},
+  {t:"Chỉ có placeholder, không có label",why:"Khi gõ, gợi ý biến mất và người dùng quên ô đó hỏi gì. Trình đọc màn hình cũng không coi placeholder là nhãn chắc chắn.",bad:"<input name=\"ho_ten\" placeholder=\"Họ và tên\">",fix:"<label for=\"ho-ten\">Họ và tên</label>\n<input id=\"ho-ten\" name=\"ho_ten\">"},
+  {t:"Checkbox không có label",why:"Vùng bấm chỉ là ô vuông nhỏ và chữ bên cạnh không được gắn với ô.",bad:"<input type=\"checkbox\" name=\"hp\"> INS2053",fix:"<label><input type=\"checkbox\" name=\"hp\"> INS2053</label>"},
+  {t:"Nhóm radio không có fieldset",why:"Trình đọc màn hình đọc từng lựa chọn mà không biết câu hỏi chung của nhóm.",bad:"<input type=\"radio\" name=\"gt\"> Nam\n<input type=\"radio\" name=\"gt\"> Nữ",fix:"<fieldset>\n  <legend>Giới tính</legend>\n  <label><input type=\"radio\" name=\"gt\"> Nam</label>\n  <label><input type=\"radio\" name=\"gt\"> Nữ</label>\n</fieldset>"}],
+ dialog:[
+  ["gv","Em đã có placeholder \"Họ và tên\" rồi, cần label nữa không?"],
+  ["sv","Cần. Placeholder biến mất khi gõ, thường nhạt khó đọc và không phải nhãn đáng tin cho trình đọc màn hình. Label luôn hiển thị và bấm vào label sẽ focus vào ô nhập."],
+  ["gv","Label và ô nhập liên kết với nhau bằng cách nào?"],
+  ["sv","Thuộc tính for của label có giá trị bằng id của ô nhập. Hoặc em bọc ô nhập bên trong label."],
+  ["gv","Khi nào em cần fieldset và legend?"],
+  ["sv","Khi có nhóm radio hoặc checkbox cùng trả lời một câu hỏi, ví dụ Giới tính. Legend là câu hỏi chung của nhóm."]]},
+
+{id:6,title:"Kiểm tra dữ liệu form",level:"Trung bình",
+ q:"HTML5 cung cấp những cách kiểm tra dữ liệu nào ngay trên form? Chỉ kiểm tra ở trình duyệt đã đủ chưa?",
+ theory:[
+  "Thuộc tính kiểm tra: <code>required</code>, <code>type=\"email | url | number | date\"</code>, <code>minlength</code> và <code>maxlength</code>, <code>min</code>, <code>max</code>, <code>step</code>, <code>pattern</code> (biểu thức chính quy).",
+  "Khi bấm gửi mà dữ liệu sai, trình duyệt chặn gửi và hiện thông báo. Sự kiện <code>submit</code> chỉ xảy ra khi form hợp lệ. Thuộc tính <code>novalidate</code> trên form tắt cơ chế này.",
+  "<code>pattern</code> tự khớp toàn bộ chuỗi nên không cần <code>^</code> và <code>$</code>. Nên thêm <code>title</code> để mô tả định dạng đúng.",
+  "Mã sinh viên, số điện thoại không dùng <code>type=\"number\"</code>: số 0 đầu bị mất và có nút tăng giảm không cần thiết. Dùng <code>type=\"text\"</code> hoặc <code>tel</code> kèm <code>inputmode=\"numeric\"</code> và <code>pattern</code>.",
+  "Kiểm tra ở trình duyệt chỉ để thuận tiện cho người dùng. Người dùng có thể tắt, sửa HTML trong DevTools hoặc gửi request trực tiếp, nên máy chủ <em>bắt buộc</em> phải kiểm tra lại."],
+ keys:[
+  {t:"required, type, min/max, minlength, pattern",kw:["required","pattern","min","max"]},
+  {t:"Trình duyệt chặn gửi khi form không hợp lệ",kw:["chan","hop le","thong bao"]},
+  {t:"pattern là biểu thức chính quy",kw:["regex","bieu thuc","pattern"]},
+  {t:"Không dùng type=number cho mã sinh viên, số điện thoại",kw:["number","so 0","mssv","dien thoai"]},
+  {t:"Máy chủ vẫn phải kiểm tra lại",kw:["server","may chu"]}],
+ answer:"Em dùng các thuộc tính required, type như email hoặc number, minlength, maxlength, min, max, step và pattern với biểu thức chính quy. Nếu dữ liệu sai, trình duyệt chặn gửi và hiện thông báo. Tuy vậy chỉ kiểm tra ở trình duyệt là chưa đủ, vì người dùng có thể bỏ qua nó, nên máy chủ vẫn phải kiểm tra lại dữ liệu.",
+ code:"<form>\n  <p>\n    <label for=\"mssv\">Mã sinh viên (8 chữ số)</label>\n    <input id=\"mssv\" name=\"mssv\" required pattern=\"[0-9]{8}\" inputmode=\"numeric\" title=\"Nhập đúng 8 chữ số\">\n  </p>\n  <p>\n    <label for=\"email\">Email</label>\n    <input id=\"email\" name=\"email\" type=\"email\" required>\n  </p>\n  <p>\n    <label for=\"diem\">Điểm (0 - 10)</label>\n    <input id=\"diem\" name=\"diem\" type=\"number\" min=\"0\" max=\"10\" step=\"0.5\" required>\n  </p>\n  <p>\n    <label for=\"ten\">Họ tên (3 - 50 ký tự)</label>\n    <input id=\"ten\" name=\"ho_ten\" minlength=\"3\" maxlength=\"50\" required>\n  </p>\n  <button type=\"submit\">Lưu</button>\n</form>",
+ bad:"<form novalidate>\n  <p>\n    <label for=\"mssv\">Mã sinh viên</label>\n    <input id=\"mssv\" name=\"mssv\" type=\"number\">\n  </p>\n  <p>\n    <label for=\"email\">Email</label>\n    <input id=\"email\" name=\"email\" type=\"text\">\n  </p>\n  <p>\n    <label for=\"diem\">Điểm</label>\n    <input id=\"diem\" name=\"diem\">\n  </p>\n  <button type=\"submit\">Lưu</button>\n</form>",
+ errors:[
+  {t:"Quên bỏ novalidate",why:"Form gửi đi mọi dữ liệu, kể cả ô trống hoặc sai định dạng. Bấm Lưu ở bản lỗi để thấy.",bad:"<form novalidate>\n  <input name=\"email\" type=\"email\" required>\n</form>",fix:"<form>\n  <input name=\"email\" type=\"email\" required>\n</form>"},
+  {t:"Dùng type=\"number\" cho mã sinh viên",why:"Số 0 ở đầu bị mất, xuất hiện nút tăng giảm và cho phép nhập ký tự như e. Mã không phải là số để tính toán.",bad:"<input name=\"mssv\" type=\"number\">",fix:"<input name=\"mssv\" inputmode=\"numeric\" pattern=\"[0-9]{8}\" title=\"8 chữ số\">"},
+  {t:"Viết pattern nhưng không có title",why:"Khi sai, người dùng chỉ thấy thông báo chung chung. title cho biết định dạng đúng.",bad:"<input name=\"mssv\" pattern=\"[0-9]{8}\">",fix:"<input name=\"mssv\" pattern=\"[0-9]{8}\" title=\"Nhập đúng 8 chữ số\">"},
+  {t:"Chỉ kiểm tra phía trình duyệt",why:"Người dùng có thể xóa thuộc tính required trong DevTools hoặc gửi request trực tiếp. Máy chủ phải kiểm tra lại mọi dữ liệu nhận được.",bad:"<input name=\"diem\" type=\"number\" max=\"10\">\n<!-- máy chủ tin tuyệt đối -->",fix:"<input name=\"diem\" type=\"number\" max=\"10\">\n<!-- máy chủ cũng kiểm tra diem <= 10 -->"}],
+ dialog:[
+  ["gv","Em kiểm tra mã sinh viên 8 chữ số bằng cách nào?"],
+  ["sv","Em dùng pattern=\"[0-9]{8}\" cùng required và title mô tả định dạng. pattern tự khớp toàn bộ chuỗi nên không cần ^ và $."],
+  ["gv","Sao không dùng type=\"number\" cho mã sinh viên?"],
+  ["sv","Vì number làm mất số 0 đứng đầu, có nút tăng giảm không cần thiết và cho nhập ký tự e. Em dùng text với inputmode=\"numeric\" và pattern."],
+  ["gv","Có kiểm tra ở HTML rồi thì máy chủ còn phải kiểm tra không?"],
+  ["sv","Vẫn phải kiểm tra. Người dùng có thể sửa HTML trong DevTools hoặc gửi request trực tiếp. Kiểm tra ở trình duyệt chỉ để thuận tiện cho người dùng."]]},
+
+{id:7,title:"Bảng dữ liệu",level:"Cơ bản",
+ q:"Khi nào dùng <table>? Mô tả cấu trúc chuẩn của một bảng dữ liệu và vai trò của thead, tbody, th, caption, colspan.",
+ theory:[
+  "<code>table</code> dành cho dữ liệu dạng bảng (hàng và cột có quan hệ với nhau), <em>không</em> dùng để dàn trang. Dàn trang là việc của CSS (flexbox, grid).",
+  "Cấu trúc: <code>caption</code> (tên bảng), <code>thead</code> (dòng tiêu đề), <code>tbody</code> (dữ liệu), <code>tfoot</code> (tổng kết). <code>tr</code> là hàng, <code>th</code> là ô tiêu đề, <code>td</code> là ô dữ liệu.",
+  "<code>th scope=\"col\"</code> hoặc <code>scope=\"row\"</code> cho biết ô là tiêu đề của cột hay của hàng, giúp trình đọc màn hình đọc đúng ngữ cảnh.",
+  "<code>colspan</code> gộp cột, <code>rowspan</code> gộp hàng. Tổng số ô (tính cả phần gộp) của các hàng phải bằng nhau.",
+  "Nếu viết <code>tr</code> trực tiếp trong <code>table</code>, trình duyệt tự chèn <code>tbody</code>. Nên viết rõ để CSS, JavaScript thao tác chắc chắn. Bảng rộng trên điện thoại thì bọc trong khối có <code>overflow-x: auto</code>."],
+ keys:[
+  {t:"Chỉ dùng table cho dữ liệu, không dàn trang",kw:["du lieu","dan trang","layout"]},
+  {t:"thead, tbody, tfoot",kw:["thead","tbody","tfoot"]},
+  {t:"th và thuộc tính scope",kw:["th","scope"]},
+  {t:"colspan, rowspan để gộp ô",kw:["colspan","rowspan"]},
+  {t:"caption là tên bảng",kw:["caption"]}],
+ answer:"Em dùng table cho dữ liệu dạng bảng chứ không dùng để dàn trang. Cấu trúc chuẩn gồm caption làm tên bảng, thead chứa dòng tiêu đề, tbody chứa dữ liệu và tfoot chứa tổng kết. Ô tiêu đề dùng th kèm scope để trình đọc màn hình hiểu ngữ cảnh, còn colspan và rowspan dùng để gộp ô.",
+ code:"<table>\n  <caption>Danh sách sinh viên lớp K68-IS</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">MSSV</th>\n      <th scope=\"col\">Họ tên</th>\n      <th scope=\"col\">Điểm</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr><td>23020001</td><td>Nguyễn Minh Anh</td><td>8.5</td></tr>\n    <tr><td>23020002</td><td>Trần Quốc Bảo</td><td>7.0</td></tr>\n  </tbody>\n  <tfoot>\n    <tr><th scope=\"row\" colspan=\"2\">Điểm trung bình</th><td>7.75</td></tr>\n  </tfoot>\n</table>",
+ bad:"<table>\n  <tr>\n    <td>MSSV</td>\n    <td>Họ tên</td>\n    <td>Điểm</td>\n  </tr>\n  <tr>\n    <td>23020001</td>\n    <td>Nguyễn Minh Anh</td>\n    <td>8.5</td>\n    <td>ô thừa</td>\n  </tr>\n</table>",
+ errors:[
+  {t:"Dùng table để dàn trang",why:"Trình đọc màn hình sẽ đọc nội dung như dữ liệu bảng và bố cục khó thích ứng với điện thoại. Hãy dùng CSS flexbox hoặc grid.",bad:"<table>\n  <tr><td>Menu</td><td>Nội dung</td></tr>\n</table>",fix:"<div class=\"layout\">\n  <nav>Menu</nav>\n  <main>Nội dung</main>\n</div>"},
+  {t:"Ô tiêu đề dùng td, không có th",why:"Trình đọc màn hình không biết đâu là tiêu đề cột, và CSS cũng khó định dạng riêng dòng tiêu đề.",bad:"<tr><td>MSSV</td><td>Họ tên</td></tr>",fix:"<tr><th scope=\"col\">MSSV</th><th scope=\"col\">Họ tên</th></tr>"},
+  {t:"Số ô các hàng không bằng nhau",why:"Bảng bị lệch cột. Kiểm tra ô thừa hoặc thiếu, hoặc colspan chưa tính đúng.",bad:"<tr><td>1</td><td>A</td></tr>\n<tr><td>2</td><td>B</td><td>thừa</td></tr>",fix:"<tr><td>1</td><td>A</td></tr>\n<tr><td>2</td><td>B</td></tr>"},
+  {t:"Bảng rộng làm trang cuộn ngang trên điện thoại",why:"Trang bị kéo rộng hơn màn hình. Bọc bảng trong khối cuộn riêng.",bad:"<table>…nhiều cột…</table>",fix:"<div style=\"overflow-x:auto\">\n  <table>…nhiều cột…</table>\n</div>"}],
+ dialog:[
+  ["gv","Em dùng table để dàn trang menu được không?"],
+  ["sv","Không nên. table dành cho dữ liệu dạng bảng. Dàn trang em dùng CSS flexbox hoặc grid."],
+  ["gv","Giải thích vai trò của thead, tbody và th scope."],
+  ["sv","thead chứa dòng tiêu đề, tbody chứa dữ liệu, tfoot chứa tổng kết. th scope=\"col\" cho biết ô là tiêu đề của cả cột nên trình đọc màn hình đọc đúng ngữ cảnh."],
+  ["gv","Muốn một ô tổng kết trải rộng hai cột thì làm sao?"],
+  ["sv","Em dùng colspan=\"2\" trên ô đó. Các ô còn lại trong hàng phải cộng đủ số cột của bảng."]]},
+
+{id:8,title:"Bảng CRUD",level:"Nâng cao",
+ q:"Một bảng CRUD cần những thành phần HTML nào? Nút Sửa và Xóa hoạt động ra sao? HTML có hỗ trợ method PUT và DELETE không?",
+ theory:[
+  "CRUD là Create, Read, Update, Delete. <em>Read</em> là bảng <code>table</code>. <em>Create</em> là form thêm mới. <em>Update</em> là form điền sẵn dữ liệu bằng <code>value</code>. <em>Delete</em> là nút gửi mã của bản ghi.",
+  "Mỗi hàng cần định danh bản ghi: <code>&lt;input type=\"hidden\" name=\"id\" value=\"3\"&gt;</code> trong form nhỏ, hoặc <code>data-id=\"3\"</code> để JavaScript đọc.",
+  "Form HTML chỉ hỗ trợ <code>GET</code> và <code>POST</code> (và <code>dialog</code>). PUT, DELETE phải gọi bằng JavaScript (<code>fetch</code>) hoặc dùng trường ẩn <code>_method</code> để framework phía máy chủ hiểu.",
+  "Không xóa dữ liệu bằng liên kết GET (<code>&lt;a href=\"xoa?id=3\"&gt;</code>): trình duyệt tải trước hoặc bot có thể tự mở liên kết và xóa nhầm. Xóa phải dùng POST.",
+  "Nút trong bảng luôn khai báo <code>type</code> rõ ràng. Nên có bước xác nhận trước khi xóa (JavaScript hoặc <code>dialog</code>). Không đặt form lồng trong form."],
+ keys:[
+  {t:"Bảng hiển thị dữ liệu, form thêm và sửa",kw:["table","bang","form"]},
+  {t:"Mỗi dòng có id (hidden hoặc data-id)",kw:["hidden","data-id","id"]},
+  {t:"Form chỉ hỗ trợ GET và POST; PUT, DELETE qua JavaScript",kw:["fetch","javascript","_method","chi ho tro","chi co get"]},
+  {t:"Không xóa bằng liên kết GET, dùng POST",kw:["post","khong dung get","bot"]},
+  {t:"Xác nhận trước khi xóa",kw:["xac nhan","confirm","dialog"]}],
+ answer:"Bảng CRUD gồm table để hiển thị dữ liệu, form thêm mới và form sửa điền sẵn giá trị. Mỗi dòng có nút Sửa và Xóa gắn với id của bản ghi, bằng input hidden trong form nhỏ hoặc data-id cho JavaScript. HTML form chỉ hỗ trợ GET và POST, nên PUT hoặc DELETE phải gọi bằng fetch hoặc dùng trường _method. Em không dùng liên kết GET để xóa vì có thể bị xóa nhầm, và nên có bước xác nhận.",
+ code:"<table>\n  <caption>Quản lý sinh viên</caption>\n  <thead>\n    <tr><th scope=\"col\">MSSV</th><th scope=\"col\">Họ tên</th><th scope=\"col\">Thao tác</th></tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>23020001</td>\n      <td>Nguyễn Minh Anh</td>\n      <td>\n        <a href=\"/sinh-vien/1/sua\">Sửa</a>\n        <form action=\"/sinh-vien/xoa\" method=\"post\" style=\"display:inline\">\n          <input type=\"hidden\" name=\"id\" value=\"1\">\n          <button type=\"submit\">Xóa</button>\n        </form>\n      </td>\n    </tr>\n    <tr>\n      <td>23020002</td>\n      <td>Trần Quốc Bảo</td>\n      <td>\n        <a href=\"/sinh-vien/2/sua\">Sửa</a>\n        <form action=\"/sinh-vien/xoa\" method=\"post\" style=\"display:inline\">\n          <input type=\"hidden\" name=\"id\" value=\"2\">\n          <button type=\"submit\">Xóa</button>\n        </form>\n      </td>\n    </tr>\n  </tbody>\n</table>",
+ bad:"<table>\n  <thead>\n    <tr><th>MSSV</th><th>Họ tên</th><th>Thao tác</th></tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>23020001</td>\n      <td>Nguyễn Minh Anh</td>\n      <td>\n        <a href=\"/sinh-vien/xoa?id=1\">Xóa</a>\n        <form action=\"/sinh-vien/sua\" method=\"put\">\n          <button>Sửa</button>\n        </form>\n      </td>\n    </tr>\n  </tbody>\n</table>",
+ errors:[
+  {t:"Xóa bằng liên kết GET",why:"Bot tìm kiếm, tính năng tải trước hoặc người dùng bấm nhầm đều có thể kích hoạt xóa. GET chỉ nên dùng để đọc dữ liệu.",bad:"<a href=\"/sinh-vien/xoa?id=1\">Xóa</a>",fix:"<form action=\"/sinh-vien/xoa\" method=\"post\">\n  <input type=\"hidden\" name=\"id\" value=\"1\">\n  <button type=\"submit\">Xóa</button>\n</form>"},
+  {t:"Quên input hidden chứa id",why:"Máy chủ nhận được yêu cầu xóa nhưng không biết xóa bản ghi nào.",bad:"<form action=\"/sinh-vien/xoa\" method=\"post\">\n  <button type=\"submit\">Xóa</button>\n</form>",fix:"<form action=\"/sinh-vien/xoa\" method=\"post\">\n  <input type=\"hidden\" name=\"id\" value=\"1\">\n  <button type=\"submit\">Xóa</button>\n</form>"},
+  {t:"Viết method=\"put\" hoặc \"delete\" trên form",why:"Giá trị không hợp lệ, trình duyệt coi như GET. Dùng fetch trong JavaScript hoặc trường ẩn _method.",bad:"<form method=\"delete\" action=\"/sv/1\">",fix:"<form method=\"post\" action=\"/sv/1\">\n  <input type=\"hidden\" name=\"_method\" value=\"DELETE\">"},
+  {t:"Đặt form lồng trong form",why:"HTML không cho phép. Trình duyệt bỏ thẻ form bên trong nên nút Xóa gửi nhầm form ngoài.",bad:"<form action=\"/luu\">\n  <form action=\"/xoa\">…</form>\n</form>",fix:"<form action=\"/luu\">…</form>\n<form action=\"/xoa\">…</form>"}],
+ dialog:[
+  ["gv","Nút Xóa trong bảng của em hoạt động như thế nào?"],
+  ["sv","Mỗi dòng có một form nhỏ method POST với input hidden chứa id bản ghi và nút type=\"submit\". Máy chủ nhận id rồi xóa. Nếu dùng JavaScript, em gắn data-id vào nút rồi gọi fetch."],
+  ["gv","Có thể viết form method=\"delete\" không?"],
+  ["sv","Không. Form HTML chỉ hỗ trợ GET và POST. Muốn gửi DELETE hoặc PUT thì em gọi fetch bằng JavaScript, hoặc dùng trường ẩn _method để framework hiểu."],
+  ["gv","Vì sao không làm nút xóa bằng thẻ a?"],
+  ["sv","Liên kết gửi yêu cầu GET mà GET không nên thay đổi dữ liệu. Trình duyệt tải trước hoặc bot có thể tự mở liên kết và xóa mất dữ liệu."]]},
+
+{id:9,title:"id, class, div, span",level:"Cơ bản",
+ q:"Phân biệt id và class. Phân biệt div và span, phần tử block, inline và inline-block.",
+ theory:[
+  "<code>id</code> là duy nhất trong trang: dùng cho liên kết neo, <code>label for</code>, <code>getElementById</code>. <code>class</code> dùng chung cho nhiều phần tử, và một phần tử có thể có nhiều class cách nhau bằng dấu cách. Khi viết CSS nên ưu tiên class để dễ tái sử dụng.",
+  "<code>div</code> là phần tử <em>khối</em> (block): chiếm trọn một hàng, nhận <code>width</code> và <code>height</code>. <code>span</code> là phần tử <em>dòng</em> (inline): nằm trong dòng chữ, không nhận <code>width</code> và <code>height</code>. <code>inline-block</code> vừa nằm trên dòng vừa nhận kích thước (nút, nhãn badge).",
+  "Cả <code>div</code> và <code>span</code> đều không mang ngữ nghĩa, chỉ dùng khi không có thẻ ngữ nghĩa phù hợp.",
+  "<code>data-*</code> lưu dữ liệu riêng cho JavaScript: <code>data-id=\"3\"</code> đọc bằng <code>element.dataset.id</code>.",
+  "Trong khung xem trước bên dưới đã có sẵn các class <code>note</code>, <code>badge</code>, <code>ok</code>, <code>warn</code> để thử."],
+ keys:[
+  {t:"id duy nhất, dùng cho neo, label for, JavaScript",kw:["duy nhat","id"]},
+  {t:"class dùng chung cho nhiều phần tử",kw:["class","nhieu"]},
+  {t:"div là block, chiếm cả hàng",kw:["block","khoi","chiem"]},
+  {t:"span là inline, nằm trong dòng",kw:["inline","dong"]},
+  {t:"inline-block vừa cùng dòng vừa nhận kích thước",kw:["inline-block"]}],
+ answer:"id phải duy nhất trong trang và dùng cho liên kết neo, label for hay JavaScript. class dùng chung cho nhiều phần tử. div là phần tử khối, chiếm cả hàng và nhận width, height. span là phần tử dòng, nằm trong dòng chữ và không nhận kích thước. inline-block nằm cùng dòng nhưng vẫn nhận kích thước. Cả hai đều không có ngữ nghĩa.",
+ code:"<div id=\"thong-bao\" class=\"note\">\n  Sinh viên <span class=\"badge ok\">23020001</span> đã được lưu.\n</div>\n<div class=\"note warn\">\n  Còn <span class=\"badge warn\">2</span> hồ sơ thiếu ảnh.\n</div>\n<p>\n  Ba phần tử inline:\n  <span style=\"background:#ffd7c8;color:#151a2e\">một</span>\n  <span style=\"background:#c9efdc;color:#151a2e\">hai</span>\n  <span style=\"background:#d6dcff;color:#151a2e\">ba</span>\n</p>\n<div style=\"background:#ffd7c8;color:#151a2e\">div thứ nhất chiếm cả hàng</div>\n<div style=\"background:#c9efdc;color:#151a2e\">div thứ hai nằm ở hàng kế</div>\n<button class=\"badge\" data-id=\"3\">Nút có data-id</button>",
+ bad:"<div id=\"thong-bao\" class=\"note\">Lần 1</div>\n<div id=\"thong-bao\" class=\"note\">Lần 2</div>\n<span style=\"width:240px;height:60px;background:#ffd7c8;color:#151a2e\">span không nhận width và height</span>\n<p>Văn bản <div>khối bên trong p</div></p>",
+ errors:[
+  {t:"Hai phần tử trùng id",why:"id phải duy nhất. Liên kết neo, label for và getElementById chỉ tìm thấy phần tử đầu tiên.",bad:"<div id=\"thong-bao\">…</div>\n<div id=\"thong-bao\">…</div>",fix:"<div class=\"thong-bao\">…</div>\n<div class=\"thong-bao\">…</div>"},
+  {t:"Đặt width và height cho span",why:"Phần tử inline bỏ qua kích thước. Đổi sang display: inline-block hoặc dùng div.",bad:"<span style=\"width:240px;height:60px\">…</span>",fix:"<span style=\"display:inline-block;width:240px;height:60px\">…</span>"},
+  {t:"Đặt div bên trong p",why:"p tự đóng khi gặp phần tử khối, nên xuất hiện thêm một thẻ p rỗng. Dùng div hoặc span cho phù hợp.",bad:"<p>Văn bản <div>khối</div></p>",fix:"<div>Văn bản <span>nội dung</span></div>"},
+  {t:"Dùng id để tạo kiểu hàng loạt",why:"Một id chỉ nên đại diện cho một phần tử. Hãy dùng class cho kiểu dùng lại nhiều lần.",bad:"<p id=\"canh-bao\">…</p>\n<p id=\"canh-bao\">…</p>",fix:"<p class=\"canh-bao\">…</p>\n<p class=\"canh-bao\">…</p>"}],
+ dialog:[
+  ["gv","Hai phần tử có thể cùng id không?"],
+  ["sv","Không. id phải duy nhất trong trang vì label for, liên kết neo và getElementById dựa vào nó. class thì dùng chung cho nhiều phần tử."],
+  ["gv","div và span khác nhau thế nào?"],
+  ["sv","div là phần tử khối, chiếm cả hàng và nhận width, height. span là phần tử dòng, nằm trong dòng chữ và không nhận width, height. Cả hai không có ngữ nghĩa."],
+  ["gv","Còn inline-block?"],
+  ["sv","Nằm cùng dòng như inline nhưng vẫn nhận kích thước như block, thường dùng cho nút hoặc nhãn badge."]]},
+
+{id:10,title:"Ảnh, tiêu đề, kiểm tra lỗi",level:"Trung bình",
+ q:"Thuộc tính alt của thẻ <img> để làm gì? Quy tắc dùng thẻ tiêu đề h1 đến h6? Em kiểm tra HTML của mình có hợp lệ bằng cách nào?",
+ theory:[
+  "<code>alt</code> mô tả ảnh bằng chữ: trình đọc màn hình đọc nó, hiển thị khi ảnh lỗi, và công cụ tìm kiếm dùng để hiểu ảnh. Ảnh chỉ để trang trí đặt <code>alt=\"\"</code> (rỗng) để trình đọc bỏ qua.",
+  "Khai báo <code>width</code> và <code>height</code> để trình duyệt giữ chỗ, tránh trang bị giật khi ảnh tải xong. Ảnh có chú thích thì dùng <code>figure</code> và <code>figcaption</code>.",
+  "Tiêu đề <code>h1</code> đến <code>h6</code> tạo dàn ý cho trang: mỗi trang một <code>h1</code>, các cấp đi tuần tự (h1, h2, h3), không nhảy cấp. Không dùng h3 chỉ vì muốn chữ nhỏ, hãy chỉnh cỡ chữ bằng CSS.",
+  "Cách kiểm tra: W3C Markup Validator (validator.w3.org), tab Elements và Console trong DevTools (F12), Lighthouse để chấm accessibility và SEO.",
+  "Trình duyệt tự sửa nhiều lỗi lồng thẻ, nên \"hiển thị được\" chưa có nghĩa là \"đúng\". Ảnh trong ví dụ là ảnh nhúng sẵn; trên website thật, <code>src</code> là đường dẫn tới file như <code>images/logo.png</code>."],
+ keys:[
+  {t:"alt mô tả ảnh cho trình đọc màn hình, ảnh trang trí để alt rỗng",kw:["alt","man hinh","mo ta"]},
+  {t:"Mỗi trang một h1",kw:["h1","mot"]},
+  {t:"Các cấp tiêu đề đi tuần tự, không nhảy cấp",kw:["tuan tu","nhay cap","khong nhay","cap"]},
+  {t:"Dùng W3C Validator, DevTools hoặc Lighthouse để kiểm tra",kw:["validator","w3c","devtools","lighthouse"]},
+  {t:"width, height và figure",kw:["width","height","figure"]}],
+ answer:"Thuộc tính alt mô tả nội dung ảnh để trình đọc màn hình đọc, hiển thị khi ảnh lỗi và giúp công cụ tìm kiếm hiểu ảnh. Ảnh trang trí để alt rỗng. Mỗi trang chỉ có một h1, các cấp tiêu đề đi tuần tự và không dùng thẻ tiêu đề chỉ để chỉnh cỡ chữ. Em kiểm tra HTML bằng W3C Validator, DevTools và Lighthouse.",
+ code:"<h1>Quản lý sinh viên</h1>\n<h2>Giới thiệu</h2>\n<figure>\n  <img src=\""+SVG+"\"\n       alt=\"Logo màu cam của khoa\" width=\"160\" height=\"90\">\n  <figcaption>Logo của khoa (ảnh minh họa)</figcaption>\n</figure>\n<h2>Chức năng</h2>\n<h3>Thêm sinh viên</h3>\n<p>Nhập thông tin vào biểu mẫu.</p>\n<h3>Xóa sinh viên</h3>\n<p>Bấm nút Xóa trên từng dòng.</p>",
+ bad:"<h1>Quản lý sinh viên</h1>\n<h1>Giới thiệu</h1>\n<img src=\""+SVG+"\">\n<h4>Thêm sinh viên</h4>\n<h3>Chữ nhỏ cho đẹp</h3>",
+ errors:[
+  {t:"Ảnh thiếu alt",why:"Người dùng trình đọc màn hình chỉ nghe tên file, và khi ảnh lỗi thì chỗ đó trống.",bad:"<img src=\"logo.png\">",fix:"<img src=\"logo.png\" alt=\"Logo của khoa\" width=\"160\" height=\"90\">"},
+  {t:"Nhiều thẻ h1 trong một trang",why:"Dàn ý của trang mất cấp bậc. Mỗi trang một h1, các phần còn lại dùng h2 trở xuống.",bad:"<h1>Quản lý sinh viên</h1>\n<h1>Giới thiệu</h1>",fix:"<h1>Quản lý sinh viên</h1>\n<h2>Giới thiệu</h2>"},
+  {t:"Nhảy cấp tiêu đề",why:"Từ h1 nhảy xuống h4 làm trình đọc màn hình tưởng thiếu mất nội dung ở các cấp giữa.",bad:"<h1>…</h1>\n<h4>…</h4>",fix:"<h1>…</h1>\n<h2>…</h2>"},
+  {t:"Dùng thẻ tiêu đề để chỉnh cỡ chữ",why:"Cỡ chữ là việc của CSS. Thẻ tiêu đề dùng sai chỗ làm dàn ý trang sai.",bad:"<h3>Chữ nhỏ cho đẹp</h3>",fix:"<p class=\"chu-nho\">Chữ nhỏ cho đẹp</p>"}],
+ dialog:[
+  ["gv","Ảnh trang trí có cần alt không?"],
+  ["sv","Vẫn khai báo alt nhưng để rỗng, alt=\"\", để trình đọc màn hình bỏ qua. Ảnh có nội dung thì alt mô tả ngắn gọn nội dung ảnh."],
+  ["gv","Trang của em có hai h1, được không?"],
+  ["sv","Không nên. Mỗi trang chỉ có một h1, các cấp sau đi tuần tự h2, h3, không nhảy cấp. Muốn chữ nhỏ hơn thì em chỉnh bằng CSS chứ không đổi thẻ."],
+  ["gv","Em kiểm tra lỗi HTML bằng cách nào?"],
+  ["sv","Em dùng W3C Validator, mở DevTools (F12) xem tab Elements và Console, và chạy Lighthouse để xem accessibility. Trình duyệt tự sửa nhiều lỗi nên hiển thị được chưa chắc là đúng."]]}
+];
+
+/* ===== Kiểm tra nhanh ===== */
+function parse(code){return new DOMParser().parseFromString(code,'text/html')}
+function lint(code){
+  var out=[],add=function(m){out.push(m)};
+  if(/<\s*(!doctype|html|head)\b/i.test(code)){
+    if(!/<!doctype\s+html/i.test(code)) add('Thiếu <!DOCTYPE html>: trình duyệt có thể chạy ở quirks mode.');
+    if(!/<html[^>]*\blang\s*=/i.test(code)) add('Thẻ <html> chưa có thuộc tính lang (ví dụ lang="vi").');
+    if(!/<meta[^>]*charset/i.test(code)) add('Thiếu <meta charset="UTF-8">: chữ tiếng Việt có thể bị lỗi.');
+    if(!/<meta[^>]*name\s*=\s*["']viewport/i.test(code)) add('Thiếu meta viewport: trang sẽ hiển thị nhỏ trên điện thoại.');
+    if(!/<title\b/i.test(code)) add('Thiếu thẻ <title>.');
+    else if(!/<\/title\s*>/i.test(code)) add('Thẻ <title> chưa đóng: toàn bộ nội dung phía sau bị coi là tiêu đề nên trang trống.');
+  }
+  var b=parse(code).body; if(!b) return out;
+  var ids={},dups={};
+  $$('[id]',b).forEach(function(e){if(ids[e.id]) dups[e.id]=1; ids[e.id]=1});
+  Object.keys(dups).forEach(function(k){add('id="'+k+'" bị trùng: id phải duy nhất trong trang.')});
+  var im=$$('img:not([alt])',b).length; if(im) add(im+' ảnh thiếu thuộc tính alt.');
+  var hs=$$('h1,h2,h3,h4,h5,h6',b);
+  if($$('h1',b).length>1) add('Có '+$$('h1',b).length+' thẻ h1: mỗi trang chỉ nên có một.');
+  var prev=0; hs.forEach(function(h){var l=+h.tagName.charAt(1); if(prev&&l>prev+1) add('Tiêu đề nhảy cấp: h'+prev+' rồi h'+l+' (thiếu h'+(prev+1)+').'); prev=l});
+  if($$('main',b).length>1) add('Có nhiều hơn một thẻ <main>.');
+  if($('div[class*=header],div[class*=footer],div[class*=nav],div[class*=menu],div[class*=main]',b)) add('Gợi ý: div đang đóng vai header, nav, main hoặc footer. Hãy dùng thẻ ngữ nghĩa tương ứng.');
+  if($$('p',b).some(function(p){return !p.childNodes.length})) add('Có thẻ <p> rỗng, thường do viết thẻ khối (div, table) bên trong <p>.');
+  var noHref=$$('a:not([href])',b).length; if(noHref) add(noHref+' thẻ <a> không có href nên không phải liên kết.');
+  $$('a[href^="#"]',b).forEach(function(a){var id=a.getAttribute('href').slice(1); if(id&&!ids[id]) add('Liên kết neo href="#'+id+'" không có phần tử nào id="'+id+'".')});
+  $$('a[target=_blank]',b).forEach(function(a){if(!/noopener/.test(a.getAttribute('rel')||'')) add('Liên kết target="_blank" thiếu rel="noopener noreferrer".')});
+  $$('a',b).forEach(function(a){if(/^\s*(bấm vào đây|click here|xem thêm|tại đây)\s*$/i.test(a.textContent)) add('Chữ liên kết "'+a.textContent.trim()+'" không nói lên đích đến.')});
+  $$('a[href]',b).forEach(function(a){if(/(xoa|delete|remove)/i.test(a.getAttribute('href'))) add('Liên kết GET dùng để xóa dữ liệu ("'+a.getAttribute('href')+'"): nên dùng form POST.')});
+  var navBad=$$('nav a',b).some(function(a){return !a.closest('li')}); if(navBad) add('Liên kết trong <nav> chưa nằm trong danh sách ul và li.');
+  $$('label',b).forEach(function(l){
+    var t=l.textContent.trim();
+    if(!l.htmlFor&&!l.querySelector('input,select,textarea')) add('Label "'+t+'" chưa gắn với ô nào: thiếu for hoặc chưa bọc ô nhập.');
+    else if(l.htmlFor&&!ids[l.htmlFor]) add('label for="'+l.htmlFor+'" không khớp id nào.');
+  });
+  var labels=$$('label',b);
+  $$('input,select,textarea',b).forEach(function(c){
+    var tp=(c.getAttribute('type')||'').toLowerCase(); if(/^(hidden|submit|button|reset|image)$/.test(tp)) return;
+    var d='«'+(c.getAttribute('name')||c.id||tp||c.tagName.toLowerCase())+'»';
+    var lab=c.closest('label')||(c.id&&labels.some(function(l){return l.htmlFor===c.id}))||c.hasAttribute('aria-label')||c.hasAttribute('aria-labelledby');
+    if(!lab) add('Ô '+d+' chưa có label.');
+    if(c.closest('form')&&!c.hasAttribute('name')) add('Ô '+d+' không có name nên dữ liệu sẽ không được gửi.');
+    if(tp==='number'&&/mssv|sdt|phone|dien_thoai/i.test(c.getAttribute('name')||'')) add('Ô '+d+' dùng type="number" cho mã hoặc số điện thoại: số 0 đầu sẽ mất.');
+  });
+  $$('form',b).forEach(function(f){
+    var m=(f.getAttribute('method')||'').toLowerCase();
+    if(f.hasAttribute('novalidate')) add('Form có novalidate nên mọi kiểm tra HTML5 bị tắt.');
+    if(f.hasAttribute('action')&&!f.hasAttribute('method')) add('Form có action nhưng chưa khai báo method (mặc định là GET).');
+    if(m&&!/^(get|post|dialog)$/.test(m)) add('Form không hỗ trợ method="'+m+'": trình duyệt coi như GET.');
+    var rd=$$('input[type=radio]',f); var nm={}; rd.forEach(function(r){nm[r.name]=1});
+    if(rd.length>1&&Object.keys(nm).length===rd.length) add('Các radio có name khác nhau nên không thành một nhóm chọn một.');
+    var nb=$$('button:not([type])',f).length; if(nb) add(nb+' nút <button> trong form không có type (mặc định là submit).');
+  });
+  $$('table',b).forEach(function(t){
+    var counts=[].map.call(t.rows,function(r){return [].reduce.call(r.cells,function(s,c){return s+(c.colSpan||1)},0)});
+    var uniq={}; counts.forEach(function(c){uniq[c]=1});
+    if(Object.keys(uniq).length>1) add('Các hàng của bảng có số ô khác nhau ('+counts.join(', ')+').');
+    if(!t.querySelector('th')) add('Bảng chưa có ô tiêu đề <th>.');
+  });
+  return out;
+}
+function outlineHtml(code){
+  var b=parse(code).body, hs=$$('h1,h2,h3,h4,h5,h6',b); if(!hs.length) return '';
+  var prev=0;
+  return '<div class="outline"><b>Dàn ý tiêu đề của trang</b>'+hs.map(function(h){
+    var l=+h.tagName.charAt(1), skip=prev&&l>prev+1; prev=l;
+    return '<div class="'+(skip?'skip':'')+'" style="padding-left:'+((l-1)*18)+'px">h'+l+' · '+esc(h.textContent.trim())+(skip?' (nhảy cấp)':'')+'</div>';
+  }).join('')+'</div>';
+}
+
+/* ===== Khung hiển thị ===== */
+function renderPreview(code,box){
+  var doc=parse(code);
+  $$('script,iframe,object,embed,link,meta,style,base',doc).forEach(function(n){n.remove()});
+  $$('*',doc).forEach(function(el){
+    [].slice.call(el.attributes).forEach(function(a){
+      if(/^on/i.test(a.name)) el.removeAttribute(a.name);
+      else if(/^(href|src|action|formaction)$/i.test(a.name)&&/^\s*javascript:/i.test(a.value)) el.removeAttribute(a.name);
+    });
+  });
+  var html=doc.body.innerHTML;
+  box.innerHTML=html.trim()?html:'<p class="pv-empty">Trang trống. Hãy kiểm tra thẻ chưa đóng (ví dụ </title>) ở phần mã.</p>';
+}
+function wirePreview(box,say){
+  box.addEventListener('click',function(e){
+    var a=e.target.closest('a'); if(!a||!box.contains(a)) return;
+    e.preventDefault();
+    var href=a.getAttribute('href');
+    if(href===null){say('Thẻ <a> không có href nên không phải liên kết: bấm không dẫn đi đâu.','warn');return}
+    if(href.charAt(0)==='#'){
+      var id=href.slice(1), t=id&&[].slice.call(box.querySelectorAll('[id]')).filter(function(x){return x.id===id})[0];
+      if(!id){say('Liên kết "#" quay về đầu trang.','info');return}
+      if(t){t.scrollIntoView({block:'nearest'}); t.classList.add('flash'); setTimeout(function(){t.classList.remove('flash')},1400); say('Nhảy tới phần tử id="'+id+'".','ok')}
+      else say('Không có phần tử nào id="'+id+'": liên kết neo này hỏng, bấm vào không đi đâu.','warn');
+      return;
+    }
+    say('Trình duyệt sẽ mở: '+href+(a.getAttribute('target')==='_blank'?' (trong tab mới)':''),'info');
+  });
+  box.addEventListener('submit',function(e){
+    e.preventDefault();
+    var f=e.target, fd=new FormData(f), parts=[];
+    fd.forEach(function(v,k){parts.push(k+' = '+(v===''?'(trống)':v))});
+    var m=f.getAttribute('method'), act=f.getAttribute('action');
+    var head='Gửi '+(m?m.toUpperCase():'GET (mặc định)')+' tới '+(act||'chính trang này')+'. ';
+    say(parts.length?head+'Dữ liệu gửi đi: '+parts.join(' · '):head+'Không có dữ liệu nào được gửi vì không ô nào có name.',parts.length?'ok':'warn');
+  },true);
+}
+
+/* ===== Phần 1: bộ câu hỏi ===== */
+var lastQ=1;
+function renderQuestion(n){
+  lastQ=n; var q=Q[n-1], root=$('#view-cau-hoi');
+  var nav=Q.map(function(x){return '<a href="#cau-'+x.id+'"'+(x.id===n?' aria-current="true"':'')+'><span class="qn">'+x.id+'</span><span>'+esc(x.title)+'</span></a>'}).join('');
+  var errs=q.errors.map(function(e){
+    return '<li class="err"><h4>'+esc(e.t)+'</h4><p>'+esc(e.why)+'</p><div class="pair">'+
+      '<figure class="cmp bad"><figcaption>Sai</figcaption><pre class="code"><code>'+hl(e.bad)+'</code></pre></figure>'+
+      '<figure class="cmp good"><figcaption>Đúng</figcaption><pre class="code"><code>'+hl(e.fix)+'</code></pre></figure></div></li>';
+  }).join('');
+  var chat=q.dialog.map(function(d){return '<div class="msg '+d[0]+'"><b>'+(d[0]==='gv'?'Giảng viên':'Sinh viên')+'</b>'+esc(d[1])+'</div>'}).join('');
+  root.innerHTML=
+  '<div class="qlayout"><nav class="qnav" aria-label="Danh sách câu hỏi">'+nav+'</nav>'+
+  '<article class="qbody">'+
+   '<header class="qhead"><p class="eyebrow">Câu '+n+' / '+Q.length+' <span class="lvl">'+esc(q.level)+'</span></p>'+
+   '<h2 class="qtitle">'+esc(q.q)+'</h2></header>'+
+   '<section class="sec"><h3 class="sh">Kiến thức đằng sau câu hỏi</h3><ul class="theory">'+q.theory.map(function(t){return '<li>'+t+'</li>'}).join('')+'</ul>'+
+   '<div class="keys"><h4>Trả lời đủ ý khi nêu được</h4><ul>'+q.keys.map(function(k){return '<li>'+esc(k.t)+'</li>'}).join('')+'</ul></div></section>'+
+   '<section class="sec"><h3 class="sh">Ví dụ mã HTML: sửa trực tiếp và quan sát</h3>'+
+    '<div class="toolbar"><button class="btn" type="button" id="ui-bad">Nạp bản có lỗi</button><button class="btn" type="button" id="ui-good">Về bản đúng</button><button class="btn" type="button" id="ui-copy">Sao chép mã</button>'+
+    '<label class="switch"><input type="checkbox" id="ui-tags" checked> Hiện khung thẻ ngữ nghĩa</label></div>'+
+    '<div class="editor"><pre class="ed-hl" id="ui-hl" aria-hidden="true"></pre><textarea class="ed-ta" id="ui-code" spellcheck="false" wrap="off" aria-label="Mã HTML, có thể chỉnh sửa"></textarea></div>'+
+    '<div class="pvwrap"><div class="pvhead">Kết quả hiển thị</div><div class="pv tagview" id="ui-pv"></div><p class="status info" id="ui-status" role="status">Bấm thử liên kết hoặc nút trong khung trên để xem điều gì xảy ra.</p></div>'+
+    '<div class="lint"><h4>Kiểm tra nhanh <span class="count" id="ui-count">0</span></h4><ul id="ui-lint"></ul><div id="ui-outline"></div></div></section>'+
+   '<section class="sec"><h3 class="sh">Lỗi thường gặp và cách sửa</h3><ul class="errs">'+errs+'</ul></section>'+
+   '<section class="sec"><h3 class="sh">Hỏi và đáp mẫu</h3><div class="chat">'+chat+'</div></section>'+
+   '<div class="pager">'+(n>1?'<a class="btn" href="#cau-'+(n-1)+'" style="text-decoration:none">← Câu '+(n-1)+'</a>':'<span></span>')+
+   '<button class="btn primary" type="button" id="ui-go-practice">Luyện trả lời câu này</button>'+
+   (n<Q.length?'<a class="btn" href="#cau-'+(n+1)+'" style="text-decoration:none">Câu '+(n+1)+' →</a>':'<span></span>')+'</div>'+
+  '</article></div>';
+  mountEditor(q);
+  $('#ui-go-practice').addEventListener('click',function(){practiceIdx=n-1;location.hash='#luyen-van-dap'});
+}
+function mountEditor(q){
+  var ta=$('#ui-code'),pre=$('#ui-hl'),pv=$('#ui-pv'),status=$('#ui-status');
+  function say(m,k){status.textContent=m;status.className='status '+(k||'info')}
+  function size(){ta.style.height='auto';ta.style.height=(ta.scrollHeight+4)+'px'}
+  function update(){
+    pre.innerHTML=hl(ta.value)+'\n'; size(); renderPreview(ta.value,pv);
+    var items=lint(ta.value);
+    $('#ui-lint').innerHTML=items.length?items.map(function(m){return '<li class="w">'+esc(m)+'</li>'}).join(''):'<li class="ok">Không phát hiện lỗi phổ biến nào.</li>';
+    $('#ui-count').textContent=items.length;
+    $('#ui-outline').innerHTML=q.id===10?outlineHtml(ta.value):'';
+    say('Bấm thử liên kết hoặc nút trong khung trên để xem điều gì xảy ra.','info');
+  }
+  ta.value=q.code;
+  ta.addEventListener('input',update);
+  ta.addEventListener('scroll',function(){pre.scrollLeft=ta.scrollLeft});
+  $('#ui-bad').addEventListener('click',function(){ta.value=q.bad;update()});
+  $('#ui-good').addEventListener('click',function(){ta.value=q.code;update()});
+  $('#ui-tags').addEventListener('change',function(e){pv.classList.toggle('tagview',e.target.checked)});
+  $('#ui-copy').addEventListener('click',function(){
+    var done=function(){say('Đã sao chép mã vào bộ nhớ tạm.','ok')};
+    var fb=function(){ta.focus();ta.select();say('Đã chọn toàn bộ mã, hãy nhấn Ctrl+C (hoặc Cmd+C).','info')};
+    try{navigator.clipboard.writeText(ta.value).then(done,fb)}catch(e){fb()}
+  });
+  wirePreview(pv,say);
+  update();
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(size);
+}
+
+/* ===== Phần 2: luyện vấn đáp ===== */
+var practiceIdx=0;
+function norm(s){return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d')}
+function renderPractice(){
+  var root=$('#view-luyen'), q=Q[practiceIdx], prog=store.get('vd-progress',{});
+  var done=Object.keys(prog).filter(function(k){return prog[k]>=q.keys.length||prog[k]>=Q[k-1].keys.length}).length;
+  var chips=Q.map(function(x,i){return '<button type="button" class="chip'+(prog[x.id]>=x.keys.length?' done':'')+'" data-i="'+i+'" aria-pressed="'+(i===practiceIdx)+'" aria-label="Câu '+x.id+'">'+x.id+'</button>'}).join('');
+  root.innerHTML=
+  '<div class="plan">'+
+   '<div><h2 class="qtitle" style="margin:0 0 8px">Luyện vấn đáp</h2><p class="qhint" style="max-width:62ch">Đọc câu hỏi, tự gõ câu trả lời bằng lời của em, rồi bấm chấm theo từ khóa. Sau đó xem đáp án mẫu và đoạn hỏi đáp tiếp theo của giảng viên.</p></div>'+
+   '<div class="chips" role="group" aria-label="Chọn câu hỏi">'+chips+'<button type="button" class="chip" id="ui-rand" style="padding-inline:16px">Câu ngẫu nhiên</button></div>'+
+   '<p class="prog">Đã trả lời đủ ý: '+done+' / '+Q.length+' câu (lưu trên trình duyệt này).</p>'+
+   '<div class="ask"><b>Giảng viên hỏi · Câu '+q.id+'</b><p>'+esc(q.q)+'</p></div>'+
+   '<div><label for="ui-answer" class="qhint" style="display:block;margin-bottom:6px">Câu trả lời của em</label><textarea id="ui-answer" class="ans" placeholder="Viết câu trả lời như khi nói với giảng viên..."></textarea></div>'+
+   '<div class="row"><button type="button" class="btn primary" id="ui-grade">Chấm theo từ khóa</button><button type="button" class="btn" id="ui-model">Xem đáp án mẫu</button><button type="button" class="btn" id="ui-replay">Xem đoạn hỏi đáp tiếp theo</button><a href="#cau-'+q.id+'" class="btn" style="text-decoration:none">Ôn lại lý thuyết</a></div>'+
+   '<div id="ui-out" role="status" aria-live="polite" style="display:flex;flex-direction:column;gap:16px"></div>'+
+  '</div>';
+  $$('.chip[data-i]',root).forEach(function(c){c.addEventListener('click',function(){practiceIdx=+c.dataset.i;renderPractice()})});
+  $('#ui-rand').addEventListener('click',function(){var r;do{r=Math.floor(Math.random()*Q.length)}while(r===practiceIdx);practiceIdx=r;renderPractice()});
+  $('#ui-grade').addEventListener('click',function(){
+    var txt=norm($('#ui-answer').value), out=$('#ui-out');
+    if(txt.trim().length<8){out.innerHTML='<p class="qhint">Hãy viết câu trả lời trước (ít nhất một câu) rồi bấm chấm.</p>';return}
+    var hit=0, rows=q.keys.map(function(k){var ok=k.kw.some(function(w){return txt.indexOf(w)>-1}); if(ok) hit++; return '<li class="'+(ok?'hit':'miss')+'"><span>'+(ok?'Có':'Thiếu')+'</span><span>'+esc(k.t)+'</span></li>'}).join('');
+    var p=store.get('vd-progress',{}); if((p[q.id]||0)<hit){p[q.id]=hit;store.set('vd-progress',p)}
+    out.innerHTML='<div><b>Em nêu được '+hit+' / '+q.keys.length+' ý chính.</b><p class="qhint" style="margin:4px 0 10px">Chấm bằng từ khóa chỉ mang tính gợi ý. Em có thể đã nói đúng ý bằng từ khác.</p><ul class="res">'+rows+'</ul></div>';
+    var c=$$('.chip[data-i="'+practiceIdx+'"]',root)[0]; if(c&&hit>=q.keys.length) c.classList.add('done');
+  });
+  $('#ui-model').addEventListener('click',function(){
+    $('#ui-out').insertAdjacentHTML('beforeend','<div class="model"><b>Đáp án mẫu</b>'+esc(q.answer)+'</div>');
+  });
+  $('#ui-replay').addEventListener('click',function(){
+    var out=$('#ui-out'), box=document.createElement('div'); box.className='chat'; out.appendChild(box);
+    var i=0, btn=document.createElement('button'); btn.type='button'; btn.className='btn';
+    function next(){
+      var d=q.dialog[i]; box.insertAdjacentHTML('beforeend','<div class="msg '+d[0]+'"><b>'+(d[0]==='gv'?'Giảng viên':'Sinh viên')+'</b>'+esc(d[1])+'</div>'); i++;
+      if(i>=q.dialog.length) btn.remove(); else btn.textContent=(q.dialog[i][0]==='gv'?'Giảng viên hỏi tiếp':'Xem em trả lời');
+    }
+    btn.addEventListener('click',next); out.appendChild(btn); next();
+  });
+}
+
+/* ===== Phần 3: demo buổi giảng ===== */
+var STEPS=[
+ {t:"Nhìn tổng thể bố cục",q:2,targets:["#s-header","#s-nav","#s-main","#s-footer"],
+  say:"Trước hết em nhìn bố cục. Trang chia thành bốn khối là header, nav, main và footer. Thầy sẽ hỏi: vì sao không viết bốn thẻ div? Vì thẻ ngữ nghĩa cho trình đọc màn hình và công cụ tìm kiếm biết vai trò của từng khối.",
+  code:"<header>…</header>\n<nav>…</nav>\n<main>…</main>\n<footer>…</footer>"},
+ {t:"Header, tiêu đề và ảnh",q:10,targets:["#s-header"],
+  say:"Header chứa logo và tiêu đề h1. Mỗi trang chỉ có một h1. Ảnh logo có thuộc tính alt để người dùng trình đọc màn hình biết ảnh đó là gì, và có width, height để trang không bị giật khi tải ảnh.",
+  code:"<header>\n  <img src=\"logo.png\" alt=\"Logo khoa\"\n       width=\"40\" height=\"40\">\n  <h1>Quản lý sinh viên</h1>\n</header>"},
+ {t:"Thanh điều hướng",q:3,targets:["#s-nav"],
+  say:"Menu là một danh sách liên kết trong nav. Đây là liên kết neo, mỗi liên kết trỏ tới id của một section. Hãy thử bấm 'Thêm mới' để xem trang nhảy tới phần tử có id tương ứng. aria-current đánh dấu mục hiện tại.",
+  code:"<nav aria-label=\"Điều hướng chính\">\n  <ul>\n    <li><a href=\"#s-list\" aria-current=\"page\">Danh sách</a></li>\n    <li><a href=\"#s-form\">Thêm mới</a></li>\n    <li><a href=\"#s-contact\">Liên hệ</a></li>\n  </ul>\n</nav>",
+  act:{label:"Thử bấm \"Thêm mới\"",run:function(){var a=$('#s-nav a[href="#s-form"]');if(a)a.click()}}},
+ {t:"Main và các section",q:2,targets:["#s-list","#s-form","#s-contact"],
+  say:"Nội dung chính nằm trong một thẻ main duy nhất. Bên trong chia ba section, mỗi section có một tiêu đề h2. Đó là cách dàn ý của trang rõ ràng.",
+  code:"<main>\n  <section id=\"s-list\"><h2>…</h2></section>\n  <section id=\"s-form\"><h2>…</h2></section>\n  <section id=\"s-contact\"><h2>…</h2></section>\n</main>"},
+ {t:"Form và label",q:4,targets:["#s-f"],
+  say:"Form gửi bằng POST vì đây là thao tác thêm dữ liệu. Mỗi ô có label for khớp với id, và có name để dữ liệu được gửi lên. Nút Nhập lại có type reset, nút Lưu có type submit.",
+  code:"<form action=\"/sinh-vien/luu\" method=\"post\">\n  <label for=\"ho-ten\">Họ và tên</label>\n  <input id=\"ho-ten\" name=\"ho_ten\"\n         required minlength=\"3\">\n  …\n  <button type=\"submit\">Lưu</button>\n  <button type=\"reset\">Nhập lại</button>\n</form>"},
+ {t:"Kiểm tra dữ liệu",q:6,targets:["#mssv","#email","#diem"],
+  say:"Em dùng required, pattern cho mã sinh viên 8 chữ số, type email và number kèm min, max. Hãy bấm thử gửi form khi để trống: trình duyệt chặn gửi và báo lỗi. Nhớ rằng máy chủ vẫn phải kiểm tra lại.",
+  code:"<input id=\"mssv\" name=\"mssv\" required\n       pattern=\"[0-9]{8}\" inputmode=\"numeric\"\n       title=\"Nhập đúng 8 chữ số\">\n<input id=\"email\" name=\"email\"\n       type=\"email\" required>\n<input id=\"diem\" name=\"diem\" type=\"number\"\n       min=\"0\" max=\"10\" step=\"0.5\" required>",
+  act:{label:"Thử gửi form khi để trống",run:function(){var f=$('#s-f');if(f){f.reset();endEdit();f.reportValidity()}}}},
+ {t:"Bảng dữ liệu",q:7,targets:["#s-table"],
+  say:"Đây là bảng dữ liệu đúng nghĩa. Có caption làm tên bảng, thead với các th scope=col, tbody chứa dữ liệu, tfoot dùng colspan để ô tổng trải rộng nhiều cột.",
+  code:"<table>\n  <caption>Sinh viên lớp K68</caption>\n  <thead>\n    <tr><th scope=\"col\">MSSV</th>…</tr>\n  </thead>\n  <tbody>…</tbody>\n  <tfoot>\n    <tr><th scope=\"row\" colspan=\"3\">Tổng số</th>\n        <td colspan=\"2\">3</td></tr>\n  </tfoot>\n</table>"},
+ {t:"Các thao tác CRUD",q:8,targets:["#s-tbody button"],
+  say:"Mỗi dòng có nút Sửa và Xóa. Trong bản demo, nút có data-id để JavaScript biết bản ghi nào. Trên máy chủ thật, em dùng form POST với input hidden chứa id. HTML form không có PUT và DELETE, và không xóa bằng liên kết GET. Hãy bấm Xóa hai lần để xác nhận.",
+  code:"<td>\n  <button type=\"button\" data-act=\"edit\"\n          data-id=\"1\">Sửa</button>\n  <button type=\"button\" data-act=\"delete\"\n          data-id=\"1\">Xóa</button>\n</td>",
+  act:{label:"Thử bấm Sửa dòng đầu tiên",run:function(){var b=$('#s-tbody button[data-act=edit]');if(b)b.click()}}},
+ {t:"Footer và tổng kết",q:9,targets:["#s-footer"],
+  say:"Cuối trang là footer. Để kết thúc, thầy thường hỏi thêm: id khác class thế nào, div khác span ra sao, và em kiểm tra lỗi HTML bằng cách nào. Hãy bật chế độ 'Bấm để bị hỏi' rồi bấm vào các phần tử để thầy đặt câu hỏi.",
+  code:"<footer>\n  <p>© 2026 · INS2053</p>\n</footer>"}
+];
+var students,nextId,editing,armed,stepI=0;
+function resetData(){students=[
+  {id:1,mssv:"23020001",ten:"Nguyễn Minh Anh",email:"anh.nm@example.edu.vn",lop:"K68-IS",diem:8.5},
+  {id:2,mssv:"23020002",ten:"Trần Quốc Bảo",email:"bao.tq@example.edu.vn",lop:"K68-CS",diem:7},
+  {id:3,mssv:"23020003",ten:"Lê Thu Hà",email:"ha.lt@example.edu.vn",lop:"K68-IS",diem:9}];
+  nextId=4;editing=null;armed=null}
+function siteHtml(){return ''+
+'<div class="site tagview" id="site">'+
+ '<header id="s-header"><img src="'+SVG+'" alt="Logo khoa" width="40" height="40"><h1>Quản lý sinh viên</h1></header>'+
+ '<nav id="s-nav" aria-label="Điều hướng chính"><ul><li><a href="#s-list" aria-current="page">Danh sách</a></li><li><a href="#s-form">Thêm mới</a></li><li><a href="#s-contact">Liên hệ</a></li></ul></nav>'+
+ '<main id="s-main">'+
+  '<section id="s-list"><h2>Danh sách sinh viên</h2><div class="tscroll"><table id="s-table"><caption>Sinh viên lớp K68</caption>'+
+   '<thead><tr><th scope="col">MSSV</th><th scope="col">Họ tên</th><th scope="col">Lớp</th><th scope="col">Điểm</th><th scope="col">Thao tác</th></tr></thead><tbody id="s-tbody"></tbody>'+
+   '<tfoot><tr><th scope="row" colspan="3">Tổng số sinh viên</th><td colspan="2" id="s-count"></td></tr></tfoot></table></div></section>'+
+  '<section id="s-form"><h2 id="s-title">Thêm sinh viên</h2>'+
+   '<form id="s-f" action="/sinh-vien/luu" method="post"><fieldset><legend id="s-legend">Thông tin sinh viên</legend>'+
+    '<input type="hidden" name="id" id="s-id" value="">'+
+    '<div class="f"><label for="mssv">Mã sinh viên</label><input id="mssv" name="mssv" required pattern="[0-9]{8}" inputmode="numeric" title="Nhập đúng 8 chữ số"></div>'+
+    '<div class="f"><label for="ho-ten">Họ và tên</label><input id="ho-ten" name="ho_ten" required minlength="3"></div>'+
+    '<div class="f"><label for="email">Email</label><input id="email" name="email" type="email" required></div>'+
+    '<div class="f"><label for="lop">Lớp</label><select id="lop" name="lop"><option>K68-IS</option><option>K68-CS</option><option>K68-AI</option></select></div>'+
+    '<div class="f"><label for="diem">Điểm (0 đến 10)</label><input id="diem" name="diem" type="number" min="0" max="10" step="0.5" required></div>'+
+   '</fieldset><div class="row"><button type="submit" id="s-save">Lưu</button><button type="reset" id="s-reset">Nhập lại</button></div>'+
+   '<p class="msg2" id="s-msg" role="status"></p></form></section>'+
+  '<section id="s-contact"><h2>Liên hệ</h2><p>Email giảng viên: <a href="mailto:giangvien@example.edu.vn">giangvien@example.edu.vn</a></p></section>'+
+ '</main>'+
+ '<footer id="s-footer"><p>© 2026 · INS2053 · Bài tập vấn đáp HTML</p></footer></div>'}
+function rows(){
+  var tb=$('#s-tbody');
+  tb.innerHTML=students.length?students.map(function(s){
+    return '<tr><td>'+esc(s.mssv)+'</td><td>'+esc(s.ten)+'</td><td>'+esc(s.lop)+'</td><td>'+esc(s.diem)+'</td><td>'+
+    '<button type="button" data-act="edit" data-id="'+s.id+'">Sửa</button> <button type="button" class="danger'+(armed===s.id?' arm':'')+'" data-act="delete" data-id="'+s.id+'">'+(armed===s.id?'Bấm lần nữa để xóa':'Xóa')+'</button></td></tr>';
+  }).join(''):'<tr><td colspan="5">Chưa có sinh viên nào. Hãy thêm ở biểu mẫu bên dưới.</td></tr>';
+  $('#s-count').textContent=students.length;
+}
+function endEdit(){editing=null;var t=$('#s-title');if(t){t.textContent='Thêm sinh viên';$('#s-save').textContent='Lưu';$('#s-id').value=''}}
+function msg(t,k){var m=$('#s-msg');if(m){m.textContent=t;m.style.color=k==='bad'?'var(--bad)':'var(--ok)'}}
+function mountSite(){
+  var f=$('#s-f');
+  rows();
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var d={mssv:f.mssv.value.trim(),ten:f['ho_ten'].value.trim(),email:f.email.value.trim(),lop:f.lop.value,diem:+f.diem.value};
+    if(students.some(function(s){return s.mssv===d.mssv&&s.id!==editing})){msg('Mã sinh viên '+d.mssv+' đã tồn tại.','bad');return}
+    if(editing){var s=students.filter(function(x){return x.id===editing})[0];Object.assign(s,d);msg('Đã cập nhật sinh viên '+d.ten+'.')}
+    else{d.id=nextId++;students.push(d);msg('Đã thêm sinh viên '+d.ten+'.')}
+    f.reset();endEdit();rows();
+  });
+  f.addEventListener('reset',function(){setTimeout(endEdit,0)});
+  $('#s-tbody').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-act]');if(!b)return;
+    var id=+b.dataset.id,s=students.filter(function(x){return x.id===id})[0];if(!s)return;
+    if(b.dataset.act==='edit'){
+      armed=null;editing=id;$('#s-title').textContent='Sửa sinh viên';$('#s-save').textContent='Cập nhật';$('#s-id').value=id;
+      f.mssv.value=s.mssv;f['ho_ten'].value=s.ten;f.email.value=s.email;f.lop.value=s.lop;f.diem.value=s.diem;rows();
+      f.scrollIntoView({block:'nearest'});f.mssv.focus();
+    }else{
+      if(armed===id){students=students.filter(function(x){return x.id!==id});armed=null;msg('Đã xóa '+s.ten+'.')}else{armed=id}
+      rows();
+    }
+  });
+  document.addEventListener('click',docClick);
+}
+function docClick(e){
+  if(armed!==null&&!e.target.closest('button.danger')&&$('#s-tbody')){armed=null;rows()}
+}
+var ASK={header:[2,"Thẻ header khác div ở điểm nào? Một trang có thể có mấy header?"],nav:[3,"Em dùng nav ra sao? Vì sao bọc liên kết trong ul và li?"],main:[2,"Một trang có thể có mấy thẻ main? Vì sao?"],section:[2,"Khi nào dùng section thay vì div?"],footer:[2,"Footer thường chứa gì? Nó khác div ở điểm nào?"],
+ ul:[3,"Vì sao menu dùng danh sách?"],li:[3,"Vì sao menu dùng danh sách?"],a:[3,"Phân biệt href tuyệt đối, tương đối và liên kết neo. Khi nào cần rel=noopener?"],
+ form:[4,"Phân biệt GET và POST. Form này gửi dữ liệu theo cách nào?"],fieldset:[5,"Khi nào em dùng fieldset và legend?"],legend:[5,"Khi nào em dùng fieldset và legend?"],label:[5,"Label liên kết với ô nhập bằng cách nào? Placeholder có thay được label không?"],
+ input:[4,"Thuộc tính name khác id ở điểm nào? Thiếu name thì sao?"],select:[4,"Giá trị gửi lên máy chủ của select lấy từ đâu?"],textarea:[4,"Thuộc tính name có vai trò gì?"],
+ table:[7,"Khi nào dùng table? Nó khác dùng table để dàn trang thế nào?"],caption:[7,"Caption để làm gì?"],thead:[7,"thead, tbody, tfoot khác nhau thế nào?"],tbody:[7,"thead, tbody, tfoot khác nhau thế nào?"],tfoot:[7,"Muốn ô tổng trải qua nhiều cột thì làm thế nào?"],tr:[7,"Số ô của các hàng phải như thế nào?"],th:[7,"th khác td ở điểm nào? scope để làm gì?"],td:[7,"Số ô của các hàng phải như thế nào?"],
+ button:[8,"Nút này gửi form hay không? type của nút có tác dụng gì? Làm sao để xóa an toàn?"],img:[10,"Thuộc tính alt để làm gì? Vì sao khai báo width và height?"],
+ h1:[10,"Một trang có mấy h1? Quy tắc về thứ tự các cấp tiêu đề?"],h2:[10,"Quy tắc về thứ tự các cấp tiêu đề là gì?"],p:[9,"Phần tử p là khối hay dòng? Có thể đặt div bên trong p không?"],div:[9,"Phân biệt div và span, id và class."],span:[9,"Phân biệt div và span."]};
+function askFor(el){
+  var t=el.tagName.toLowerCase(),r=ASK[t]||[9,"Phân biệt id và class, block và inline."];
+  if((t==='input'||t==='select')&&(el.required||el.pattern||el.min||el.minLength>0)) r=[6,"Thuộc tính kiểm tra dữ liệu này hoạt động thế nào? Máy chủ có cần kiểm tra lại không?"];
+  return r;
+}
+var inspectOn=false;
+function setStep(i){
+  stepI=Math.max(0,Math.min(STEPS.length-1,i));
+  var s=STEPS[stepI];
+  $$('.hl-on').forEach(function(e){e.classList.remove('hl-on')});
+  var first=null;
+  s.targets.forEach(function(sel){$$(sel).forEach(function(e){e.classList.add('hl-on');if(!first)first=e})});
+  if(first) first.scrollIntoView({block:'nearest'});
+  $('#ui-step').innerHTML=
+   '<p class="eyebrow">Bước '+(stepI+1)+' / '+STEPS.length+'</p><h3>'+esc(s.t)+'</h3>'+
+   '<p class="say">“'+esc(s.say)+'”</p><pre class="code"><code>'+hl(s.code)+'</code></pre>'+
+   '<div class="row">'+(s.act?'<button type="button" class="btn primary" id="ui-act">'+esc(s.act.label)+'</button>':'')+'<a class="btn" style="text-decoration:none" href="#cau-'+s.q+'">Xem Câu '+s.q+'</a></div>'+
+   '<div class="row"><button type="button" class="btn" id="ui-prev"'+(stepI===0?' disabled':'')+'>← Bước trước</button><button type="button" class="btn" id="ui-next"'+(stepI===STEPS.length-1?' disabled':'')+'>Bước tiếp →</button></div>';
+  $('#ui-prev').addEventListener('click',function(){setStep(stepI-1)});
+  $('#ui-next').addEventListener('click',function(){setStep(stepI+1)});
+  if(s.act) $('#ui-act').addEventListener('click',s.act.run);
+}
+function renderDemo(){
+  var root=$('#view-demo'); resetData();
+  root.innerHTML=
+  '<div class="dlayout"><div class="lect" id="ui-lect">'+
+   '<div><h2 class="qtitle" style="font-size:1.4rem;margin:0 0 6px">Demo như một buổi giảng</h2><p class="qhint">Một website quản lý sinh viên có đủ Header, Navigation, Form, bảng CRUD và Footer. Làm theo từng bước giảng, hoặc tự bấm vào trang để bị hỏi.</p></div>'+
+   '<div id="ui-step" style="display:flex;flex-direction:column;gap:12px"></div>'+
+   '<div class="sw"><label class="switch"><input type="checkbox" id="ui-dtags" checked> Hiện khung thẻ ngữ nghĩa</label>'+
+   '<label class="switch"><input type="checkbox" id="ui-inspect"> Bấm để bị hỏi (chế độ vấn đáp)</label></div>'+
+   '<div class="insp" id="ui-insp" role="status" aria-live="polite">Bật chế độ vấn đáp rồi bấm vào một phần tử của trang để xem giảng viên sẽ hỏi gì.</div>'+
+   '<p class="status info" id="ui-dstatus" role="status" style="border:0;padding:8px 10px;border-radius:8px"></p>'+
+  '</div>'+
+  '<div class="sitebox"><div class="sitebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span style="margin-left:8px">quan-ly-sinh-vien.html</span></div>'+siteHtml()+'</div></div>';
+  mountSite();
+  var site=$('#site'),ds=$('#ui-dstatus');
+  var say=function(m,k){ds.textContent=m;ds.className='status '+(k||'info')};
+  wirePreview(site,say);
+  $('#ui-dtags').addEventListener('change',function(e){site.classList.toggle('tagview',e.target.checked)});
+  $('#ui-inspect').addEventListener('change',function(e){
+    inspectOn=e.target.checked; $$('.sel').forEach(function(x){x.classList.remove('sel')});
+    $('#ui-insp').textContent=inspectOn?'Bấm vào một phần tử của trang bên cạnh.':'Bật chế độ vấn đáp rồi bấm vào một phần tử của trang để xem giảng viên sẽ hỏi gì.';
+  });
+  site.addEventListener('click',function(e){
+    if(!inspectOn) return;
+    e.preventDefault(); e.stopPropagation();
+    var el=e.target; if(el===site) return;
+    $$('.sel').forEach(function(x){x.classList.remove('sel')}); el.classList.add('sel');
+    var a=askFor(el), tag=el.cloneNode(false); tag.removeAttribute('class');
+    var open=tag.outerHTML.replace(/<\/[^>]+>$/,'');
+    $('#ui-insp').innerHTML='<div>Em vừa chọn <code>'+esc(open.length>110?open.slice(0,110)+'…>':open)+'</code></div><div style="margin-top:6px"><b>Giảng viên hỏi:</b> '+esc(a[1])+'</div><div style="margin-top:6px"><a href="#cau-'+a[0]+'">Xem lý thuyết Câu '+a[0]+'</a></div>';
+  },true);
+  setStep(0);
+}
+function cleanupDemo(){document.removeEventListener('click',docClick)}
+
+/* ===== Điều hướng ===== */
+var firstRoute=true;
+function route(){
+  var h=(location.hash||'').slice(1), tab='cau-hoi', n=lastQ, m;
+  if(h==='luyen-van-dap') tab='luyen'; else if(h==='demo') tab='demo';
+  else if((m=h.match(/^cau-(\d+)$/))&&+m[1]>=1&&+m[1]<=Q.length) n=+m[1]; else n=1;
+  var v={'cau-hoi':$('#view-cau-hoi'),luyen:$('#view-luyen'),demo:$('#view-demo')};
+  Object.keys(v).forEach(function(k){v[k].hidden=k!==tab; if(k!==tab) v[k].innerHTML=''});
+  cleanupDemo(); inspectOn=false;
+  if(tab==='cau-hoi') renderQuestion(n); else if(tab==='luyen') renderPractice(); else renderDemo();
+  $('#tab-cau-hoi').setAttribute('href','#cau-'+lastQ);
+  [['cau-hoi','#tab-cau-hoi'],['luyen','#tab-luyen'],['demo','#tab-demo']].forEach(function(p){
+    var el=$(p[1]); if(p[0]===tab) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current');
+  });
+  if(!firstRoute) $('.tabs').scrollIntoView({block:'start'});
+  firstRoute=false;
+}
+window.addEventListener('hashchange',route);
+route();
+})();
+</script>
